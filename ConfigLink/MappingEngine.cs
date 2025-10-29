@@ -28,7 +28,14 @@ namespace ConfigLink
                 ["map_array"] = new MapArrayConverter(),
                 ["map_object"] = new MapObjectConverter(),
                 ["to_array"] = new ToArrayJoinConverter(), // to_array + join 共用一个
-                ["join"] = new ToArrayJoinConverter()
+                ["join"] = new ToArrayJoinConverter(),
+                ["case"] = new CaseConverter(),
+                ["trim"] = new TrimConverter(),
+                ["replace"] = new ReplaceConverter(),
+                ["substring"] = new SubstringConverter(),
+                ["default"] = new DefaultConverter(),
+                ["number"] = new NumberConverter(),
+                ["boolean"] = new BooleanConverter()
             };
         }
 
