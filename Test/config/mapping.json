@@ -1,0 +1,109 @@
+{
+    "mappings":[
+        {
+            "source": "OrderId",
+            "target": "id"
+        },
+        {
+            "source": "Customer.CustomerId",
+            "target": "customer_id"
+        },
+        {
+            "source": "Customer.Name",
+            "target": "customer_name"
+        },
+        {
+            "source": "Customer.Email",
+            "target": "customer_email"
+        },
+        {
+            "source": "OrderDate",
+            "target": "order_date",
+            "conversion": ["format"],
+            "conversion_params": {
+                "format": "yyyy-MM-dd"
+            }
+        },
+        {
+            "source": "TotalAmount",
+            "target": "total_amount",
+            "conversion": ["format","prepend"],
+            "conversion_params": {
+                "format": "F2",
+                "prepend": "$"
+            }
+        },
+        {
+            "source": "Items",
+            "target": "items",
+            "conversion": ["map_array"],
+            "conversion_params": {
+                "map_array": [
+                    {
+                        "source": "ProductId",
+                        "target": "product_id"
+                    },
+                    {
+                        "source": "ProductName",
+                        "target": "product_name"
+                    },
+                    {
+                        "source": "Quantity",
+                        "target": "quantity"
+                    },
+                    {
+                        "source": "Price",
+                        "target": "price",
+                        "conversion": [ "format", "prepend" ],
+                        "conversion_params": {
+                            "format": "F2",
+                            "prepend": "$"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "source": "ShippingAddress",
+            "target": "$root",
+            "conversion": ["map_object"],
+            "conversion_params": {
+                "map_object": [
+                    {
+                        "source": "Street",
+                        "target": "shipping_street"
+                    },
+                    {
+                        "source": "City",
+                        "target": "shipping_city"
+                    },
+                    {
+                        "source": "State",
+                        "target": "shipping_state"
+                    },
+                    {
+                        "source": "ZipCode",
+                        "target": "shipping_zipcode"
+                    },
+                    {
+                        "source": "Country",
+                        "target": "shipping_country"
+                    }
+                ]
+            }
+        },
+        {
+            "source": "OrderItems[0].ProductName",
+            "target": "product_name"
+        },
+        {
+            "source": "BillingAddress",
+            "target": "billing_address",
+            "conversion": ["to_array","join"],
+            "conversion_params": {
+                "to_array": ["Street", "City", "State", "ZipCode", "Country"],
+                "join": ", "
+            }
+        }
+    ]
+}

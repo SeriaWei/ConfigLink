@@ -1,0 +1,119 @@
+# .NET / C# 项目忽略规则
+# https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
+
+## Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa]rm/
+[Aa]rm64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## NuGet
+*.nuget.props
+*.nuget.targets
+.nuget/
+packages/
+# NuGet 缓存
+[Nn]uGetScratch/
+*.nupkg
+# NuGet 符号包
+*.snupkg
+
+## Visual Studio / Rider / VS Code
+# 用户特定文件
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.vs/
+.vscode/
+.idea/
+*.csproj.user
+*.dotCover
+
+## MSBuild Binary and Structured Log
+*.binlog
+
+## Rider
+.idea/
+*.sln.iml
+
+## Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+## dotnet CLI
+# .NET Core build output
+[Dd]ist/
+[Pp]ublish/
+wwwroot/
+
+## Test results
+[Tt]est[Rr]esult*/
+*.received.*
+*.trx
+
+## ASP.NET Scaffolding
+[Ss]caffolding[Rr]eadme.txt
+
+## StyleCop
+StyleCopReport.xml
+
+## ReSharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## dotnet format
+*.dotnetformat.log
+
+## Local environment files
+appsettings.*.json
+secrets.json
+*.env
+
+## macOS
+.DS_Store
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+## 其他可能生成的临时文件
+*.tmp
+*.cache
+*.log
+*.bak
+*.swp
+*~
+
+# 忽略所有 .vs 目录（Visual Studio 缓存）
+.vs/
+
+# 忽略所有 .vscode 目录（但保留推荐配置）
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# 忽略所有 .idea 目录（Rider）
+.idea/

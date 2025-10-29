@@ -1,0 +1,35 @@
+{
+    "OrderId": 1001,
+    "Customer": {
+        "CustomerId": 501,
+        "Name": "John Doe",
+        "Email": "john@example.com"
+    },
+    "OrderDate": "2025/10/29",
+    "TotalAmount": 59.97,
+    "Items": [
+        {
+            "ProductId": 1,
+            "ProductName": "Pen",
+            "Quantity": 3,
+            "Price": 19.99
+        }
+    ],
+    "OrderItems": [
+        { "ProductName": "First Item" }
+    ],
+    "ShippingAddress": {
+        "Street": "123 Main St",
+        "City": "Boston",
+        "State": "MA",
+        "ZipCode": "02108",
+        "Country": "USA"
+    },
+    "BillingAddress": {
+        "Street": "456 Oak Ave",
+        "City": "Springfield",
+        "State": "IL",
+        "ZipCode": "62701",
+        "Country": "USA"
+    }
+}
