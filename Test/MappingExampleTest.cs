@@ -1,7 +1,7 @@
 using ConfigLink;
 using System.Text.Json;
 
-namespace Test
+namespace ConfigLink.Tests
 {
     public class MappingExampleTest
     {
