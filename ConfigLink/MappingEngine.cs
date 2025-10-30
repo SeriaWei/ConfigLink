@@ -27,8 +27,8 @@ namespace ConfigLink
                 ["prepend"] = new PrependConverter(),
                 ["map_array"] = new MapArrayConverter(),
                 ["map_object"] = new MapObjectConverter(),
-                ["to_array"] = new ToArrayJoinConverter(), // to_array + join 共用一个
-                ["join"] = new ToArrayJoinConverter(),
+                ["to_array"] = new ToArrayConverter(),
+                ["join"] = new JoinConverter(),
                 ["case"] = new CaseConverter(),
                 ["trim"] = new TrimConverter(),
                 ["replace"] = new ReplaceConverter(),
@@ -113,7 +113,14 @@ namespace ConfigLink
                 if (!_converters.TryGetValue(op, out var converter))
                     continue; // 未知操作直接跳过
 
-                cur = converter.Convert(value, rule, engine);
+                // 需要将当前值转换为 JsonElement 传递给转换器
+                JsonElement currentElement = cur switch
+                {
+                    JsonElement je => je,
+                    _ => JsonSerializer.SerializeToElement(cur)
+                };
+
+                cur = converter.Convert(currentElement, rule, engine);
                 if (cur == null) break;
             }
             return cur;

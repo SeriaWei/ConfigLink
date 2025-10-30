@@ -338,7 +338,7 @@ namespace ConfigLink.Tests
             var result = engine.Transform(sourceJson);
 
             // Assert
-            Assert.Equal("Mr. \"John\"", result["prefixedName"]);
+            Assert.Equal("Mr. John", result["prefixedName"]);
         }
 
         [Fact]
@@ -594,7 +594,7 @@ namespace ConfigLink.Tests
             var result = engine.Transform(sourceJson);
 
             // Assert
-            Assert.Equal("prefix: null", result["processed"]);
+            Assert.Equal("prefix: ", result["processed"]);
         }
 
         [Fact]

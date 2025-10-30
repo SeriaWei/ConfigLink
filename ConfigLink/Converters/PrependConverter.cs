@@ -12,7 +12,15 @@ namespace ConfigLink.Converters
         public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
         {
             var prefix = rule.ConversionParams?["prepend"]?.ToString() ?? "";
-            return prefix + value.GetRawText();
+            if(value.ValueKind == JsonValueKind.Null)
+            {
+                return prefix;
+            }
+            if (value.ValueKind != JsonValueKind.String)
+            {
+                return prefix + value.GetRawText();
+            }
+            return prefix + value.GetString();
         }
     }
 }

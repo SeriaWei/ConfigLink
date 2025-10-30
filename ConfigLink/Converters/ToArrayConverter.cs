@@ -1,32 +1,31 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-    using System.Text.Json;
+using System.Text.Json;
 
 namespace ConfigLink.Converters
 {
-    public class ToArrayJoinConverter : IConverter
+    public class ToArrayConverter : IConverter
     {
         public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
         {
             if (value.ValueKind != JsonValueKind.Object) return null;
 
             var fields = rule.ConversionParams?["to_array"] as JsonElement?;
-            var join = rule.ConversionParams?["join"]?.ToString() ?? "";
 
-            var list = new List<string>();
+            var list = new List<object?>();
             if (fields?.ValueKind == JsonValueKind.Array)
             {
                 foreach (var f in fields.Value.EnumerateArray())
                 {
                     var path = f.GetString()!;
                     var v = engine.GetValueByPath(value, path);
-                    list.Add(v?.ToString() ?? "");
+                    list.Add(v);
                 }
             }
-            return string.Join(join, list);
+            return list;
         }
     }
 }
