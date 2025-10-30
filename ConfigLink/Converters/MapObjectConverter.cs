@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-    using System.Text.Json;
+using System.Text.Json;
 
 namespace ConfigLink.Converters
 {
@@ -18,8 +18,8 @@ namespace ConfigLink.Converters
         }
         List<MappingRule> DeserializeSubRules(object? obj)
         {
-            var json = System.Text.Json.JsonSerializer.Serialize(obj);
-            return System.Text.Json.JsonSerializer.Deserialize<List<MappingRule>>(json)!;
+            var json = JsonSerializer.Serialize(obj);
+            return JsonSerializer.Deserialize<List<MappingRule>>(json)!;
         }
     }
 }

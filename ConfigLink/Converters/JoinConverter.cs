@@ -13,7 +13,6 @@ namespace ConfigLink.Converters
         {
             var separator = rule.ConversionParams?["join"]?.ToString() ?? "";
 
-            // 如果输入是数组
             if (value.ValueKind == JsonValueKind.Array)
             {
                 var items = new List<string>();
@@ -24,7 +23,6 @@ namespace ConfigLink.Converters
                 return string.Join(separator, items);
             }
 
-            // 如果输入是对象，尝试转换为字符串数组后连接
             if (value.ValueKind == JsonValueKind.Object)
             {
                 var items = new List<string>();
@@ -35,7 +33,6 @@ namespace ConfigLink.Converters
                 return string.Join(separator, items);
             }
 
-            // 其他情况直接返回字符串表示
             return value.ToString();
         }
     }
