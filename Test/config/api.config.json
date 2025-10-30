@@ -1,7 +1,6 @@
 {
     "PlatformA": {
         "endpoint": "https://api.a.com/v1/users",
-        "method": "POST",
         "auth": "basic",
         "username": "admin",
         "password": "s3cr3t",
@@ -12,10 +11,8 @@
         "timeoutSeconds": 30,
         "retry": 3
     },
-
     "PlatformB": {
         "endpoint": "https://api.b.com/webhook",
-        "method": "POST",
         "auth": "bearer",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
         "headers": {
@@ -25,7 +22,6 @@
 
     "PlatformC": {
         "endpoint": "https://api.c.com/ingest",
-        "method": "POST",
         "auth": "apikey",
         "apiKey": "sk-1234567890abcdef",
         "keyLocation": "header",
@@ -34,7 +30,6 @@
 
     "PlatformD": {
         "endpoint": "https://api.d.com/data",
-        "method": "POST",
         "auth": "oauth2",
         "tokenUrl": "https://oauth.d.com/token",
         "clientId": "client_123",
@@ -45,11 +40,6 @@
 
     "PlatformE": {
         "endpoint": "https://api.e.com/echo",
-        "method": "GET",
-        "auth": "none",
-        "queryParams": {
-            "name": "{Name}",
-            "age": "{Age}"
-        }
+        "auth": "none"
     }
 }

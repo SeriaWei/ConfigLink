@@ -1,0 +1,40 @@
+{
+    "subscribe": {
+        "PlatformA": {
+            "path": "/api/v1/subscribe",
+            "method": "POST",
+            "mappings": [
+                {
+                    "source": "email",
+                    "target": "emailAddress"
+                },
+                {
+                    "source": "firstName",
+                    "target": "firstName"
+                },
+                {
+                    "source": "lastName",
+                    "target": "lastName"
+                }
+            ]
+        },
+        "PlatformB": {
+            "path": "/v2/newsletter/subscribe",
+            "method": "PUT",
+            "mappings": [
+                {
+                    "source": "email",
+                    "target": "email"
+                },
+                {
+                    "source": "firstName",
+                    "target": "fname"
+                },
+                {
+                    "source": "lastName",
+                    "target": "lname"
+                }
+            ]
+        }
+    }
+}
