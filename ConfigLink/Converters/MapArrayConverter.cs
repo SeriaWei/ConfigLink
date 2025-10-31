@@ -26,8 +26,7 @@ namespace ConfigLink.Converters
         }
         List<MappingRule> DeserializeSubRules(JsonElement conversionParams)
         {
-            var json = conversionParams.GetRawText();
-            return JsonSerializer.Deserialize<List<MappingRule>>(json)!;
+            return conversionParams.Deserialize<List<MappingRule>>() ?? new List<MappingRule>();
         }
     }
 }
