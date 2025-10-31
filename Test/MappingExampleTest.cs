@@ -23,7 +23,7 @@ namespace ConfigLink.Tests
             var sourceJson = File.ReadAllText("config/sample_input.json");
             var sourceObj = JsonSerializer.Deserialize<object>(sourceJson);
 
-            var result = engine.Transform(sourceObj);
+            var result = engine.Transform(sourceObj!);
 
             // Verify basic field mappings
             Assert.Equal(1001.0, result["id"]); // Numbers are converted to double
