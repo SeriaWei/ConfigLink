@@ -98,6 +98,8 @@ var result = engine.Transform(sourceData);
 
 ConfigLink 提供了丰富的内置转换器：
 
+> 📖 **详细文档**: 查看 [映射配置详细指南](MAPPING_GUIDE.md) 了解所有转换器的完整用法和示例
+
 | 转换器 | 功能 | 示例 |
 |--------|------|------|
 | `format` | 格式化数据（日期、数字等） | `"2025/10/29" → "2025-10-29"` |
@@ -308,6 +310,12 @@ dotnet pack -c Release
 ## 👥 维护者
 
 - [@SeriaWei](https://github.com/SeriaWei)
+
+## 📚 文档
+
+- [映射配置详细指南](MAPPING_GUIDE.md) - 完整的映射配置语法和转换器使用说明
+- [API 文档](ConfigLink/) - 源代码和 API 参考
+- [测试示例](Test/) - 完整的使用示例和测试用例
 
 ---
 

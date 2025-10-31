@@ -37,6 +37,22 @@ namespace ConfigLink
         }
 
         /// <summary>
+        /// 注册自定义转换器
+        /// </summary>
+        /// <param name="name">转换器名称</param>
+        /// <param name="converter">转换器实例</param>
+        public void RegisterConverter(string name, IConverter converter)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("转换器名称不能为空", nameof(name));
+            
+            if (converter == null)
+                throw new ArgumentNullException(nameof(converter));
+
+            _converters[name] = converter;
+        }
+
+        /// <summary>
         /// 入口：把源对象转换成目标字典
         /// </summary>
         public Dictionary<string, object?> Transform(object sourceObj)
