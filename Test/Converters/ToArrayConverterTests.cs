@@ -10,40 +10,6 @@ namespace ConfigLink.Tests.Converters
 {
     public class ToArrayConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                rule.ConversionParams = new Dictionary<string, object>();
-                
-                // 使用反射获取参数对象的属�?
-                var properties = conversionParams.GetType().GetProperties();
-                foreach (var prop in properties)
-                {
-                    var value = prop.GetValue(conversionParams);
-                    if (value != null)
-                    {
-                        // 对于数组参数，转换为JsonElement
-                        if (value.GetType().IsArray || value.GetType().Name.Contains("List"))
-                        {
-                            var jsonElement = JsonSerializer.SerializeToElement(value);
-                            rule.ConversionParams[prop.Name] = jsonElement;
-                        }
-                        else
-                        {
-                            rule.ConversionParams[prop.Name] = value;
-                        }
-                    }
-                }
-            }
-
-            return rule;
-        }
 
         private MappingEngine CreateTestEngine()
         {
@@ -60,7 +26,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new ToArrayConverter();
             var value = JsonSerializer.SerializeToElement(new[] { "not", "object" });
-            var rule = CreateRule("to_array", new { to_array = new[] { "field1", "field2" } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new[] { "field1", "field2" }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -80,7 +53,14 @@ namespace ConfigLink.Tests.Converters
                 country = "USA"
             });
             
-            var rule = CreateRule("to_array", new { to_array = new[] { "street", "city", "state", "zip" } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new[] { "street", "city", "state", "zip" }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -107,7 +87,14 @@ namespace ConfigLink.Tests.Converters
                 age = 30
             });
             
-            var rule = CreateRule("to_array", new { to_array = new[] { "name", "missing", "age", "another_missing" } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new[] { "name", "missing", "age", "another_missing" }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -142,7 +129,14 @@ namespace ConfigLink.Tests.Converters
                 id = 12345
             });
             
-            var rule = CreateRule("to_array", new { to_array = new[] { "user.profile.firstName", "user.profile.lastName", "user.contact.email", "id" } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new[] { "user.profile.firstName", "user.profile.lastName", "user.contact.email", "id" }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -166,7 +160,14 @@ namespace ConfigLink.Tests.Converters
                 age = 30
             });
             
-            var rule = CreateRule("to_array", new { to_array = new string[0] });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new string[0]
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -187,7 +188,14 @@ namespace ConfigLink.Tests.Converters
                 }
             });
             
-            var rule = CreateRule("to_array", new { to_array = new[] { "items[0]", "items[2]", "data.values[1]" } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "to_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["to_array"] = new[] { "items[0]", "items[2]", "data.values[1]" }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);

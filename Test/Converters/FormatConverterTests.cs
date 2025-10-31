@@ -10,38 +10,20 @@ namespace ConfigLink.Tests.Converters
 {
     public class FormatConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                rule.ConversionParams = new Dictionary<string, object>();
-                
-                // 使用反射获取参数对象的属�?
-                var properties = conversionParams.GetType().GetProperties();
-                foreach (var prop in properties)
-                {
-                    var value = prop.GetValue(conversionParams);
-                    if (value != null)
-                    {
-                        rule.ConversionParams[prop.Name] = value;
-                    }
-                }
-            }
-
-            return rule;
-        }
 
         [Fact]
         public void FormatConverter_ShouldFormatNumber()
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(123.456);
-            var rule = CreateRule("format", new { format = "F2" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "format" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["format"] = "F2"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -53,7 +35,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(1234.56);
-            var rule = CreateRule("format", new { format = "C" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "format" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["format"] = "C"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -68,7 +57,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement("2023-01-15T10:30:00");
-            var rule = CreateRule("format", new { format = "yyyy-MM-dd" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "format" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["format"] = "yyyy-MM-dd"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -80,7 +76,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement("not a date or number");
-            var rule = CreateRule("format", new { format = "yyyy-MM-dd" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "format" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["format"] = "yyyy-MM-dd"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -92,7 +95,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(123.456);
-            var rule = CreateRule("format", new { format = "" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "format" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["format"] = ""
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 

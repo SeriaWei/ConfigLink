@@ -10,61 +10,20 @@ namespace ConfigLink.Tests.Converters
 {
     public class PrependConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                rule.ConversionParams = new Dictionary<string, object>();
-                
-                // 使用反射获取参数对象的属�?
-                var properties = conversionParams.GetType().GetProperties();
-                foreach (var prop in properties)
-                {
-                    var value = prop.GetValue(conversionParams);
-                    if (value != null)
-                    {
-                        rule.ConversionParams[prop.Name] = value;
-                    }
-                }
-            }
-
-            return rule;
-        }
-
-        private MappingRule CreateSimplifiedRule(string converterName, string parameterValue)
-        {
-            var rule = new MappingRule
-            {
-                Target = "test",
-                Source = "test",
-                Conversion = new List<string> { converterName }
-            };
-
-            // Create simplified parameter format: {"converterName": "value"}
-            var conversionParams = new Dictionary<string, object?>
-            {
-                [converterName] = parameterValue
-            };
-
-            var jsonString = JsonSerializer.Serialize(conversionParams);
-            var jsonDoc = JsonDocument.Parse(jsonString);
-            rule.ConversionParams = jsonDoc.RootElement.EnumerateObject()
-                                         .ToDictionary(p => p.Name, p => (object)p.Value);
-
-            return rule;
-        }
 
         [Fact]
         public void PrependConverter_ShouldPrependToString()
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("world");
-            var rule = CreateRule("prepend", new { prepend = "Hello " });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = "Hello "
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -76,7 +35,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement(123);
-            var rule = CreateRule("prepend", new { prepend = "Number: " });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = "Number: "
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -88,7 +54,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement((string?)null);
-            var rule = CreateRule("prepend", new { prepend = "Prefix" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = "Prefix"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -100,7 +73,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement(new[] { 1, 2, 3 });
-            var rule = CreateRule("prepend", new { prepend = "Array: " });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = "Array: "
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -113,7 +93,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("test");
-            var rule = CreateRule("prepend", new { prepend = "" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = ""
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -125,7 +112,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("text");
-            var rule = CreateSimplifiedRule("prepend", "PREFIX: ");
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "prepend" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["prepend"] = "PREFIX: "
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 

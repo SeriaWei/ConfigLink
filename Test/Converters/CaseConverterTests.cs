@@ -10,53 +10,20 @@ namespace ConfigLink.Tests.Converters
 {
     public class CaseConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                var innerParamsJson = JsonSerializer.Serialize(conversionParams);
-                var outerJson = $@"{{ ""{converterType.ToLowerInvariant()}"": {innerParamsJson} }}";
-                
-                rule.ConversionParams = JsonSerializer.Deserialize<Dictionary<string, object>>(outerJson);
-            }
-
-            return rule;
-        }
-
-        private MappingRule CreateSimplifiedRule(string converterName, string parameterValue)
-        {
-            var rule = new MappingRule
-            {
-                Target = "test",
-                Source = "test",
-                Conversion = new List<string> { converterName }
-            };
-
-            // Create simplified parameter format: {"converterName": "value"}
-            var conversionParams = new Dictionary<string, object?>
-            {
-                [converterName] = parameterValue
-            };
-
-            var jsonString = JsonSerializer.Serialize(conversionParams);
-            var jsonDoc = JsonDocument.Parse(jsonString);
-            rule.ConversionParams = jsonDoc.RootElement.EnumerateObject()
-                                         .ToDictionary(p => p.Name, p => (object)p.Value);
-
-            return rule;
-        }
 
         [Fact]
         public void CaseConverter_ShouldConvertToUpperCase()
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = CreateRule("case", new { @case = "upper" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "case" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["case"] = new { @case = "upper" }
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -68,7 +35,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world test");
-            var rule = CreateRule("case", new { @case = "camel" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "case" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["case"] = new { @case = "camel" }
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -80,7 +54,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world test");
-            var rule = CreateRule("case", new { @case = "pascal" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "case" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["case"] = new { @case = "pascal" }
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -92,7 +73,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = CreateSimplifiedRule("case", "upper");
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "case" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["case"] = "upper"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 

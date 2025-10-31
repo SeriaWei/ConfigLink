@@ -10,31 +10,6 @@ namespace ConfigLink.Tests.Converters
 {
     public class MapObjectConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                rule.ConversionParams = new Dictionary<string, object>();
-                
-                // 使用反射获取参数对象的属�?
-                var properties = conversionParams.GetType().GetProperties();
-                foreach (var prop in properties)
-                {
-                    var value = prop.GetValue(conversionParams);
-                    if (value != null)
-                    {
-                        rule.ConversionParams[prop.Name] = value;
-                    }
-                }
-            }
-
-            return rule;
-        }
 
         private MappingEngine CreateTestEngine()
         {
@@ -51,7 +26,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapObjectConverter();
             var value = JsonSerializer.SerializeToElement(new[] { "not", "object" });
-            var rule = CreateRule("map_object", new { map_object = new object[0] });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_object" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_object"] = new object[0]
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -78,7 +60,14 @@ namespace ConfigLink.Tests.Converters
                 new { source = "email", target = "contact_email" }
             };
             
-            var rule = CreateRule("map_object", new { map_object = subRules });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_object" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_object"] = subRules
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -118,7 +107,14 @@ namespace ConfigLink.Tests.Converters
                 new { source = "metadata.created", target = "createdDate" }
             };
             
-            var rule = CreateRule("map_object", new { map_object = subRules });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_object" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_object"] = subRules
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -135,7 +131,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapObjectConverter();
             var value = JsonSerializer.SerializeToElement(new { });
-            var rule = CreateRule("map_object", new { map_object = new[] { new { source = "nonexistent", target = "missing" } } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_object" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_object"] = new[] { new { source = "nonexistent", target = "missing" } }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -163,7 +166,14 @@ namespace ConfigLink.Tests.Converters
                 new { source = "age", target = "userAge" }
             };
             
-            var rule = CreateRule("map_object", new { map_object = subRules });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_object" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_object"] = subRules
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);

@@ -10,53 +10,20 @@ namespace ConfigLink.Tests.Converters
 {
     public class TrimConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                var innerParamsJson = JsonSerializer.Serialize(conversionParams);
-                var outerJson = $@"{{ ""{converterType.ToLowerInvariant()}"": {innerParamsJson} }}";
-                
-                rule.ConversionParams = JsonSerializer.Deserialize<Dictionary<string, object>>(outerJson);
-            }
-
-            return rule;
-        }
-
-        private MappingRule CreateSimplifiedRule(string converterName, string parameterValue)
-        {
-            var rule = new MappingRule
-            {
-                Target = "test",
-                Source = "test",
-                Conversion = new List<string> { converterName }
-            };
-
-            // Create simplified parameter format: {"converterName": "value"}
-            var conversionParams = new Dictionary<string, object?>
-            {
-                [converterName] = parameterValue
-            };
-
-            var jsonString = JsonSerializer.Serialize(conversionParams);
-            var jsonDoc = JsonDocument.Parse(jsonString);
-            rule.ConversionParams = jsonDoc.RootElement.EnumerateObject()
-                                         .ToDictionary(p => p.Name, p => (object)p.Value);
-
-            return rule;
-        }
 
         [Fact]
         public void TrimConverter_ShouldTrimWhitespace()
         {
             var converter = new TrimConverter();
             var value = JsonSerializer.SerializeToElement("  hello world  ");
-            var rule = CreateRule("trim", new { type = "both" });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "trim" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["trim"] = new { type = "both" }
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 
@@ -68,7 +35,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new TrimConverter();
             var value = JsonSerializer.SerializeToElement("  hello world  ");
-            var rule = CreateSimplifiedRule("trim", "both");
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "trim" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["trim"] = "both"
+                }
+            };
 
             var result = converter.Convert(value, rule, null!);
 

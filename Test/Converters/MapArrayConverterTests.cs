@@ -10,32 +10,6 @@ namespace ConfigLink.Tests.Converters
 {
     public class MapArrayConverterTests
     {
-        private MappingRule CreateRule(string converterType, object? conversionParams = null)
-        {
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { converterType }
-            };
-
-            if (conversionParams != null)
-            {
-                rule.ConversionParams = new Dictionary<string, object>();
-                
-                // 使用反射获取参数对象的属�?
-                var properties = conversionParams.GetType().GetProperties();
-                foreach (var prop in properties)
-                {
-                    var value = prop.GetValue(conversionParams);
-                    if (value != null)
-                    {
-                        // 对于map_array参数，直接序列化数组�?
-                        rule.ConversionParams[prop.Name] = value;
-                    }
-                }
-            }
-
-            return rule;
-        }
 
         private MappingEngine CreateTestEngine()
         {
@@ -52,7 +26,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapArrayConverter();
             var value = JsonSerializer.SerializeToElement(new { not = "array" });
-            var rule = CreateRule("map_array", new { map_array = new object[0] });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_array"] = new object[0]
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -75,7 +56,14 @@ namespace ConfigLink.Tests.Converters
                 new { source = "name", target = "userName" }
             };
             
-            var rule = CreateRule("map_array", new { map_array = subRules });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_array"] = subRules
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -102,7 +90,14 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapArrayConverter();
             var value = JsonSerializer.SerializeToElement(new object[0]);
-            var rule = CreateRule("map_array", new { map_array = new[] { new { source = "test", target = "test" } } });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_array"] = new[] { new { source = "test", target = "test" } }
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
@@ -137,7 +132,14 @@ namespace ConfigLink.Tests.Converters
                 new { source = "inStock", target = "available" }
             };
             
-            var rule = CreateRule("map_array", new { map_array = subRules });
+            var rule = new MappingRule
+            {
+                Conversion = new List<string> { "map_array" },
+                ConversionParams = new Dictionary<string, object>
+                {
+                    ["map_array"] = subRules
+                }
+            };
             var engine = CreateTestEngine();
 
             var result = converter.Convert(value, rule, engine);
