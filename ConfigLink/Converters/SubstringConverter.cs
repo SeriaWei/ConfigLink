@@ -9,33 +9,32 @@ namespace ConfigLink.Converters
 {
     public class SubstringConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             var text = value.ValueKind == JsonValueKind.String ? value.GetString() : value.GetRawText().Trim('"');
             if (text == null)
                 return null;
 
-            // 尝试从 "substring" 键下获取参数
+            // 从传入的 conversionParams 中获取参数
             string? startParam = null;
             string? lengthParam = null;
             string? endParam = null;
 
-            if (rule.ConversionParams?.TryGetValue("substring", out var substringParams) == true)
+            if (conversionParams.ValueKind != JsonValueKind.Undefined)
             {
-                var substringElement = substringParams is JsonElement je ? je : JsonSerializer.SerializeToElement(substringParams);
-                if (substringElement.TryGetProperty("start", out var startProperty))
+                if (conversionParams.TryGetProperty("start", out var startProperty))
                 {
                     startParam = startProperty.ValueKind == JsonValueKind.Number ?
                                 startProperty.GetInt32().ToString() :
                                 startProperty.GetString();
                 }
-                if (substringElement.TryGetProperty("length", out var lengthProperty))
+                if (conversionParams.TryGetProperty("length", out var lengthProperty))
                 {
                     lengthParam = lengthProperty.ValueKind == JsonValueKind.Number ?
                                  lengthProperty.GetInt32().ToString() :
                                  lengthProperty.GetString();
                 }
-                if (substringElement.TryGetProperty("end", out var endProperty))
+                if (conversionParams.TryGetProperty("end", out var endProperty))
                 {
                     endParam = endProperty.ValueKind == JsonValueKind.Number ?
                               endProperty.GetInt32().ToString() :

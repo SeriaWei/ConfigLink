@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new DefaultConverter();
             var value = JsonSerializer.SerializeToElement((string?)null);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "default" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["default"] = new { value = "default text", condition = "null" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { value = "default text", condition = "null" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("default text", result);
         }

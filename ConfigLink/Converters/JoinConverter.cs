@@ -9,9 +9,17 @@ namespace ConfigLink.Converters
 {
     public class JoinConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            var separator = rule.ConversionParams?["join"]?.ToString() ?? "";
+            var separator = "";
+            if (conversionParams.ValueKind == JsonValueKind.String)
+            {
+                separator = conversionParams.GetString() ?? "";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object && conversionParams.TryGetProperty("separator", out var sepProp))
+            {
+                separator = sepProp.GetString() ?? "";
+            }
 
             if (value.ValueKind == JsonValueKind.Array)
             {

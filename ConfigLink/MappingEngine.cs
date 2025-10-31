@@ -133,7 +133,14 @@ namespace ConfigLink
                     _ => JsonSerializer.SerializeToElement(cur)
                 };
 
-                cur = converter.Convert(currentElement, rule, engine);
+                // 根据转换器名称从 ConversionParams 中提取对应的参数
+                JsonElement conversionParams = default;
+                if (rule.ConversionParams?.TryGetValue(op, out var paramObj) == true)
+                {
+                    conversionParams = paramObj is JsonElement je ? je : JsonSerializer.SerializeToElement(paramObj);
+                }
+
+                cur = converter.Convert(currentElement, conversionParams, engine);
                 if (cur == null) break;
             }
             return cur;

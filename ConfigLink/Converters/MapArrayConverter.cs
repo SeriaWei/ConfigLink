@@ -10,11 +10,11 @@ namespace ConfigLink.Converters
 
     public class MapArrayConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             if (value.ValueKind != JsonValueKind.Array) return null;
 
-            var subRules = DeserializeSubRules(rule.ConversionParams?["map_array"]);
+            var subRules = DeserializeSubRules(conversionParams);
             var result = new List<Dictionary<string, object?>>();
 
             foreach (var item in value.EnumerateArray())
@@ -24,9 +24,9 @@ namespace ConfigLink.Converters
             }
             return result;
         }
-        List<MappingRule> DeserializeSubRules(object? obj)
+        List<MappingRule> DeserializeSubRules(JsonElement conversionParams)
         {
-            var json = JsonSerializer.Serialize(obj);
+            var json = conversionParams.GetRawText();
             return JsonSerializer.Deserialize<List<MappingRule>>(json)!;
         }
     }

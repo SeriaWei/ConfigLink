@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new ReplaceConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "replace" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["replace"] = new { from = "world", to = "universe" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { from = "world", to = "universe" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("hello universe", result);
         }

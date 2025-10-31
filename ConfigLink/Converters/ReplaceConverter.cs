@@ -10,52 +10,51 @@ namespace ConfigLink.Converters
 {
     public class ReplaceConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             var text = value.ValueKind == JsonValueKind.String ? value.GetString() : value.GetRawText().Trim('"');
             if (text == null)
                 return null;
 
-            // 尝试从 "replace" 键下获取参数
+            // 从传入的 conversionParams 中获取参数
             string? search = null;
             string replace = "";
             bool useRegex = false;
             bool ignoreCase = false;
 
-            if (rule.ConversionParams?.TryGetValue("replace", out var replaceParams) == true)
+            if (conversionParams.ValueKind != JsonValueKind.Undefined)
             {
-                var replaceElement = replaceParams is JsonElement je ? je : JsonSerializer.SerializeToElement(replaceParams);
-                if (replaceElement.TryGetProperty("from", out var fromProperty))
+                if (conversionParams.TryGetProperty("from", out var fromProperty))
                 {
                     search = fromProperty.GetString();
                 }
-                else if (replaceElement.TryGetProperty("search", out var searchProperty))
+                else if (conversionParams.TryGetProperty("search", out var searchProperty))
                 {
                     search = searchProperty.GetString();
                 }
 
-                if (replaceElement.TryGetProperty("to", out var toProperty))
+                if (conversionParams.TryGetProperty("to", out var toProperty))
                 {
                     replace = toProperty.GetString() ?? "";
                 }
-                else if (replaceElement.TryGetProperty("replace", out var replaceProperty))
+                else if (conversionParams.TryGetProperty("replace", out var replaceProperty))
                 {
                     replace = replaceProperty.GetString() ?? "";
                 }
 
-                if (replaceElement.TryGetProperty("useRegex", out var useRegexProperty))
+                if (conversionParams.TryGetProperty("useRegex", out var useRegexProperty))
                 {
                     useRegex = useRegexProperty.ValueKind == JsonValueKind.True ||
                               (useRegexProperty.ValueKind == JsonValueKind.String &&
                                useRegexProperty.GetString()?.ToLowerInvariant() == "true");
                 }
-                else if (replaceElement.TryGetProperty("regex", out var regexProperty))
+                else if (conversionParams.TryGetProperty("regex", out var regexProperty))
                 {
                     useRegex = regexProperty.ValueKind == JsonValueKind.True ||
                               (regexProperty.ValueKind == JsonValueKind.String &&
                                regexProperty.GetString()?.ToLowerInvariant() == "true");
                 }
-                if (replaceElement.TryGetProperty("ignoreCase", out var ignoreCaseProperty))
+                if (conversionParams.TryGetProperty("ignoreCase", out var ignoreCaseProperty))
                 {
                     ignoreCase = ignoreCaseProperty.GetString()?.ToLowerInvariant() == "true";
                 }

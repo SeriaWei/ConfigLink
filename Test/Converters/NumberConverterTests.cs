@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new NumberConverter();
             var value = JsonSerializer.SerializeToElement("123");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "number" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["number"] = new { type = "int" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { type = "int" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal(123, result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new NumberConverter();
             var value = JsonSerializer.SerializeToElement("123");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "number" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["number"] = "int"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("int");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal(123, result);
         }

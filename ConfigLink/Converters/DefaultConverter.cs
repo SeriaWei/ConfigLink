@@ -9,23 +9,22 @@ namespace ConfigLink.Converters
 {
     public class DefaultConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            // 尝试从 "default" 键下获取参数
+            // 从传入的 conversionParams 中获取参数
             object? defaultValueObj = null;
             string condition = "null";
 
-            if (rule.ConversionParams?.TryGetValue("default", out var defaultParams) == true)
+            if (conversionParams.ValueKind != JsonValueKind.Undefined)
             {
-                var defaultElement = defaultParams is JsonElement je ? je : JsonSerializer.SerializeToElement(defaultParams);
-                if (defaultElement.TryGetProperty("value", out var valueProperty))
+                if (conversionParams.TryGetProperty("value", out var valueProperty))
                 {
                     if (valueProperty.ValueKind == JsonValueKind.String)
                         defaultValueObj = valueProperty.GetString();
                     else
                         defaultValueObj = valueProperty;
                 }
-                if (defaultElement.TryGetProperty("condition", out var conditionProperty))
+                if (conversionParams.TryGetProperty("condition", out var conditionProperty))
                 {
                     condition = conditionProperty.GetString()?.ToLowerInvariant() ?? "null";
                 }

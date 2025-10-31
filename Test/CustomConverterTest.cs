@@ -18,7 +18,7 @@ namespace ConfigLink.Tests
                 TestValue = testValue;
             }
             
-            public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+            public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
             {
                 return TestValue;
             }

@@ -9,39 +9,35 @@ namespace ConfigLink.Converters
 {
     public class BooleanConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            // 尝试从 "boolean" 键下获取参数
+            // 从传入的 conversionParams 中获取参数
             // 支持两种参数格式：
-            // 1. 简化格式：{"boolean": "yesno"} - 只指定 output 格式
-            // 2. 完整格式：{"boolean": {"output": "yesno", "trueValues": "yes,1"}}
+            // 1. 简化格式：直接是字符串值 "yesno" - 只指定 output 格式
+            // 2. 完整格式：对象 {"output": "yesno", "trueValues": "yes,1"}
             string? trueValuesParam = null;
             string? falseValuesParam = null;
             string outputFormat = "boolean";
             
-            if (rule.ConversionParams?.TryGetValue("boolean", out var booleanParams) == true)
+            if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                var booleanElement = booleanParams is JsonElement je ? je : JsonSerializer.SerializeToElement(booleanParams);
-                if (booleanElement.ValueKind == JsonValueKind.String)
+                // 简化格式：直接是字符串值，表示 output 格式
+                outputFormat = conversionParams.GetString()?.ToLowerInvariant() ?? "boolean";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object)
+            {
+                // 完整格式：嵌套对象
+                if (conversionParams.TryGetProperty("trueValues", out var trueValuesProperty))
                 {
-                    // 简化格式：直接是字符串值，表示 output 格式
-                    outputFormat = booleanElement.GetString()?.ToLowerInvariant() ?? "boolean";
+                    trueValuesParam = trueValuesProperty.GetString();
                 }
-                else if (booleanElement.ValueKind == JsonValueKind.Object)
+                if (conversionParams.TryGetProperty("falseValues", out var falseValuesProperty))
                 {
-                    // 完整格式：嵌套对象
-                    if (booleanElement.TryGetProperty("trueValues", out var trueValuesProperty))
-                    {
-                        trueValuesParam = trueValuesProperty.GetString();
-                    }
-                    if (booleanElement.TryGetProperty("falseValues", out var falseValuesProperty))
-                    {
-                        falseValuesParam = falseValuesProperty.GetString();
-                    }
-                    if (booleanElement.TryGetProperty("output", out var outputProperty))
-                    {
-                        outputFormat = outputProperty.GetString()?.ToLowerInvariant() ?? "boolean";
-                    }
+                    falseValuesParam = falseValuesProperty.GetString();
+                }
+                if (conversionParams.TryGetProperty("output", out var outputProperty))
+                {
+                    outputFormat = outputProperty.GetString()?.ToLowerInvariant() ?? "boolean";
                 }
             }
 

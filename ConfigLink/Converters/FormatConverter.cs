@@ -10,9 +10,17 @@ namespace ConfigLink.Converters
 {
     public class FormatConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            var fmt = rule.ConversionParams?["format"]?.ToString() ?? "";
+            var fmt = "";
+            if (conversionParams.ValueKind == JsonValueKind.String)
+            {
+                fmt = conversionParams.GetString() ?? "";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object && conversionParams.TryGetProperty("format", out var formatProp))
+            {
+                fmt = formatProp.GetString() ?? "";
+            }
 
             return value.ValueKind switch
             {

@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new BooleanConverter();
             var value = JsonSerializer.SerializeToElement("yes");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "boolean" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["boolean"] = new { output = "boolean" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { output = "boolean" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal(true, result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new BooleanConverter();
             var value = JsonSerializer.SerializeToElement(true);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "boolean" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["boolean"] = new { output = "yesno" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { output = "yesno" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("yes", result);
         }
@@ -54,16 +40,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new BooleanConverter();
             var value = JsonSerializer.SerializeToElement(true);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "boolean" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["boolean"] = "yesno"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("yesno");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("yes", result);
         }

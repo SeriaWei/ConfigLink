@@ -10,38 +10,34 @@ namespace ConfigLink.Converters
 {
     public class NumberConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             // 支持两种参数格式：
-            // 1. 简化格式：{"number": "int"} - 只指定 type
-            // 2. 完整格式：{"number": {"type": "int", "format": "N2"}}
+            // 1. 简化格式：直接是字符串值 "int" - 只指定 type
+            // 2. 完整格式：对象 {"type": "int", "format": "N2"}
             string outputType = "decimal";
             string? format = null;
             string culture = "invariant";
             
-            if (rule.ConversionParams?.TryGetValue("number", out var numberParams) == true)
+            if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                var numberElement = numberParams is JsonElement je ? je : JsonSerializer.SerializeToElement(numberParams);
-                if (numberElement.ValueKind == JsonValueKind.String)
+                // 简化格式：直接是字符串值，表示 type
+                outputType = conversionParams.GetString()?.ToLowerInvariant() ?? "decimal";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object)
+            {
+                // 完整格式：嵌套对象
+                if (conversionParams.TryGetProperty("type", out var typeProperty))
                 {
-                    // 简化格式：直接是字符串值，表示 type
-                    outputType = numberElement.GetString()?.ToLowerInvariant() ?? "decimal";
+                    outputType = typeProperty.GetString()?.ToLowerInvariant() ?? "decimal";
                 }
-                else if (numberElement.ValueKind == JsonValueKind.Object)
+                if (conversionParams.TryGetProperty("format", out var formatProperty))
                 {
-                    // 完整格式：嵌套对象
-                    if (numberElement.TryGetProperty("type", out var typeProperty))
-                    {
-                        outputType = typeProperty.GetString()?.ToLowerInvariant() ?? "decimal";
-                    }
-                    if (numberElement.TryGetProperty("format", out var formatProperty))
-                    {
-                        format = formatProperty.GetString();
-                    }
-                    if (numberElement.TryGetProperty("culture", out var cultureProperty))
-                    {
-                        culture = cultureProperty.GetString() ?? "invariant";
-                    }
+                    format = formatProperty.GetString();
+                }
+                if (conversionParams.TryGetProperty("culture", out var cultureProperty))
+                {
+                    culture = cultureProperty.GetString() ?? "invariant";
                 }
             }
 

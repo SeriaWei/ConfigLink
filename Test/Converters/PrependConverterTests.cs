@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("world");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = "Hello "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("Hello ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("Hello world", result);
         }
@@ -35,35 +28,21 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement(123);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = "Number: "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("Number: ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("Number: 123", result);
         }
 
         [Fact]
-        public void PrependConverter_ShouldHandleNullValue()
+        public void PrependConverter_ShouldHandleNull()
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement((string?)null);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = "Prefix"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("Prefix");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("Prefix", result);
         }
@@ -73,16 +52,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement(new[] { 1, 2, 3 });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = "Array: "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("Array: ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             // The actual result uses compact JSON format without spaces
             Assert.Equal("Array: [1,2,3]", result);
@@ -93,16 +65,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("test");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = ""
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("test", result);
         }
@@ -112,16 +77,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new PrependConverter();
             var value = JsonSerializer.SerializeToElement("text");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "prepend" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["prepend"] = "PREFIX: "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("PREFIX: ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("PREFIX: text", result);
         }

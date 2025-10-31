@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "case" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["case"] = new { @case = "upper" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { @case = "upper" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("HELLO WORLD", result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world test");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "case" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["case"] = new { @case = "camel" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { @case = "camel" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("helloWorldTest", result);
         }
@@ -54,16 +40,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world test");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "case" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["case"] = new { @case = "pascal" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { @case = "pascal" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("HelloWorldTest", result);
         }
@@ -73,16 +52,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new CaseConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "case" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["case"] = "upper"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("upper");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("HELLO WORLD", result);
         }

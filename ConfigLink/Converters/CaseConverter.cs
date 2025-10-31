@@ -11,29 +11,25 @@ namespace ConfigLink.Converters
 {
     public class CaseConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             var text = value.ValueKind == JsonValueKind.String ? value.GetString() : value.GetRawText().Trim('"');
             if (string.IsNullOrEmpty(text))
                 return text;
 
             // 支持两种参数格式：
-            // 1. 简化格式：{"case": "upper"}
-            // 2. 完整格式：{"case": {"case": "upper"}}
+            // 1. 简化格式：直接是字符串值 "upper"
+            // 2. 完整格式：对象 {"case": "upper"}
             string caseType = "lower";
-            if (rule.ConversionParams?.TryGetValue("case", out var caseParams) == true)
+            if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                var caseElement = caseParams is JsonElement je ? je : JsonSerializer.SerializeToElement(caseParams);
-                if (caseElement.ValueKind == JsonValueKind.String)
-                {
-                    // 简化格式：直接是字符串值
-                    caseType = caseElement.GetString()?.ToLowerInvariant() ?? "lower";
-                }
-                else if (caseElement.ValueKind == JsonValueKind.Object && caseElement.TryGetProperty("case", out var caseProperty))
-                {
-                    // 完整格式：嵌套对象
-                    caseType = caseProperty.GetString()?.ToLowerInvariant() ?? "lower";
-                }
+                // 简化格式：直接是字符串值
+                caseType = conversionParams.GetString()?.ToLowerInvariant() ?? "lower";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object && conversionParams.TryGetProperty("case", out var caseProperty))
+            {
+                // 完整格式：嵌套对象
+                caseType = caseProperty.GetString()?.ToLowerInvariant() ?? "lower";
             }
 
             return caseType switch

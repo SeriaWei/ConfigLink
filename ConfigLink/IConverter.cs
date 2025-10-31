@@ -9,6 +9,6 @@ namespace ConfigLink
 {
     public interface IConverter
     {
-        object? Convert(JsonElement value, MappingRule rule, MappingEngine engine);
+        object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine);
     }
 }

@@ -9,16 +9,16 @@ namespace ConfigLink.Converters
 {
     public class MapObjectConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             if (value.ValueKind != JsonValueKind.Object) return null;
 
-            var subRules = DeserializeSubRules(rule.ConversionParams?["map_object"]);
+            var subRules = DeserializeSubRules(conversionParams);
             return engine.Process(value, subRules);
         }
-        List<MappingRule> DeserializeSubRules(object? obj)
+        List<MappingRule> DeserializeSubRules(JsonElement conversionParams)
         {
-            var json = JsonSerializer.Serialize(obj);
+            var json = conversionParams.GetRawText();
             return JsonSerializer.Deserialize<List<MappingRule>>(json)!;
         }
     }

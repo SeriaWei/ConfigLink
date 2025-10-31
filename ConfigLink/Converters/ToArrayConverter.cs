@@ -9,17 +9,14 @@ namespace ConfigLink.Converters
 {
     public class ToArrayConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
             if (value.ValueKind != JsonValueKind.Object) return null;
 
-            var fields = rule.ConversionParams?["to_array"];
-            var fieldsElement = fields is JsonElement je ? je : JsonSerializer.SerializeToElement(fields);
-
             var list = new List<object?>();
-            if (fieldsElement.ValueKind == JsonValueKind.Array)
+            if (conversionParams.ValueKind == JsonValueKind.Array)
             {
-                foreach (var f in fieldsElement.EnumerateArray())
+                foreach (var f in conversionParams.EnumerateArray())
                 {
                     var path = f.GetString()!;
                     var v = engine.GetValueByPath(value, path);

@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(123.456);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "format" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["format"] = "F2"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("F2");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("123.46", result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(1234.56);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "format" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["format"] = "C"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("C");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             // Using invariant culture may produce currency symbol, just check for number
             Assert.Contains("1", result!.ToString());
@@ -57,16 +43,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement("2023-01-15T10:30:00");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "format" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["format"] = "yyyy-MM-dd"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("yyyy-MM-dd");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("2023-01-15", result);
         }
@@ -76,16 +55,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement("not a date or number");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "format" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["format"] = "yyyy-MM-dd"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("yyyy-MM-dd");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("\"not a date or number\"", result);
         }
@@ -95,16 +67,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new FormatConverter();
             var value = JsonSerializer.SerializeToElement(123.456);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "format" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["format"] = ""
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("123.456", result);
         }

@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement(new[] { "apple", "banana", "cherry" });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = ", "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(", ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("apple, banana, cherry", result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement(new[] { "one", "two", "three" });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = " | "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(" | ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("one | two | three", result);
         }
@@ -54,16 +40,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement(new { a = "value1", b = "value2", c = "value3" });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = "-"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("-");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("value1-value2-value3", result);
         }
@@ -73,16 +52,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement(new object[0]);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = ", "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(", ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("", result);
         }
@@ -92,16 +64,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement("single value");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = ", "
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(", ");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("single value", result);
         }
@@ -111,16 +76,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new JoinConverter();
             var value = JsonSerializer.SerializeToElement(new[] { "a", "b", "c" });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "join" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["join"] = ";"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(";");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("a;b;c", result);
         }

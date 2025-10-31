@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new TrimConverter();
             var value = JsonSerializer.SerializeToElement("  hello world  ");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "trim" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["trim"] = new { type = "both" }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { type = "both" });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("hello world", result);
         }
@@ -35,16 +28,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new TrimConverter();
             var value = JsonSerializer.SerializeToElement("  hello world  ");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "trim" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["trim"] = "both"
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement("both");
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("hello world", result);
         }

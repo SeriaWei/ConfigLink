@@ -16,16 +16,9 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new SubstringConverter();
             var value = JsonSerializer.SerializeToElement("hello world");
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "substring" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["substring"] = new { start = 0, length = 5 }
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new { start = 0, length = 5 });
 
-            var result = converter.Convert(value, rule, null!);
+            var result = converter.Convert(value, conversionParams, null!);
 
             Assert.Equal("hello", result);
         }

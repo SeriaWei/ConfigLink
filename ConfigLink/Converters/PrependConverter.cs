@@ -9,9 +9,18 @@ namespace ConfigLink.Converters
 {
     public class PrependConverter : IConverter
     {
-        public object? Convert(JsonElement value, MappingRule rule, MappingEngine engine)
+        public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            var prefix = rule.ConversionParams?["prepend"]?.ToString() ?? "";
+            var prefix = "";
+            if (conversionParams.ValueKind == JsonValueKind.String)
+            {
+                prefix = conversionParams.GetString() ?? "";
+            }
+            else if (conversionParams.ValueKind == JsonValueKind.Object && conversionParams.TryGetProperty("prefix", out var prefixProp))
+            {
+                prefix = prefixProp.GetString() ?? "";
+            }
+
             if(value.ValueKind == JsonValueKind.Null)
             {
                 return prefix;
