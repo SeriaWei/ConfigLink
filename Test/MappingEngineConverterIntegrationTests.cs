@@ -8,27 +8,29 @@ namespace ConfigLink.Tests
 {
     public class MappingEngineConverterIntegrationTests
     {
+
         [Fact]
         public void MappingEngine_ShouldUseCaseConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "name",
+                    Target = "userName",
+                    Conversion = new List<string> { "case" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""name"",
-                        ""target"": ""userName"",
-                        ""conversion"": [""case""],
-                        ""conversion_params"": {
-                            ""case"": {""case"": ""camel""}
-                        }
+                        ["case"] = new { @case = "camel" }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""name"": ""hello world test""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal("helloWorldTest", result["userName"]);
@@ -37,24 +39,25 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseTrimConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "message",
+                    Target = "cleanMessage",
+                    Conversion = new List<string> { "trim" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""message"",
-                        ""target"": ""cleanMessage"",
-                        ""conversion"": [""trim""],
-                        ""conversion_params"": {
-                            ""trim"": {""type"": ""both""}
-                        }
+                        ["trim"] = new { type = "both" }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""message"": ""  hello world  ""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal("hello world", result["cleanMessage"]);
@@ -63,27 +66,28 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseReplaceConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "text",
+                    Target = "modifiedText",
+                    Conversion = new List<string> { "replace" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""text"",
-                        ""target"": ""modifiedText"",
-                        ""conversion"": [""replace""],
-                        ""conversion_params"": {
-                            ""replace"": {
-                                ""search"": ""world"",
-                                ""replace"": ""universe""
-                            }
+                        ["replace"] = new {
+                            search = "world",
+                            replace = "universe"
                         }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""text"": ""hello world""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal("hello universe", result["modifiedText"]);
@@ -92,27 +96,29 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseSubstringConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "fullText",
+                    Target = "shortText",
+                    Conversion = new List<string> { "substring" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""fullText"",
-                        ""target"": ""shortText"",
-                        ""conversion"": [""substring""],
-                        ""conversion_params"": {
-                            ""substring"": {
-                                ""start"": ""0"",
-                                ""length"": ""5""
-                            }
+                        ["substring"] = new
+                        {
+                            start = "0",
+                            length = "5"
                         }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""fullText"": ""hello world""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal("hello", result["shortText"]);
@@ -121,27 +127,29 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseDefaultConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "nullValue",
+                    Target = "valueWithDefault",
+                    Conversion = new List<string> { "default" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""nullValue"",
-                        ""target"": ""valueWithDefault"",
-                        ""conversion"": [""default""],
-                        ""conversion_params"": {
-                            ""default"": {
-                                ""value"": ""default text"",
-                                ""condition"": ""null""
-                            }
+                        ["default"] = new
+                        {
+                            value = "default text",
+                            condition = "null"
                         }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""nullValue"": null
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.True(result.ContainsKey("valueWithDefault"));
@@ -152,24 +160,25 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseNumberConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "stringNumber",
+                    Target = "intNumber",
+                    Conversion = new List<string> { "number" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""stringNumber"",
-                        ""target"": ""intNumber"",
-                        ""conversion"": [""number""],
-                        ""conversion_params"": {
-                            ""number"": {""type"": ""int""}
-                        }
+                        ["number"] = new { type = "int" }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""stringNumber"": ""123""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal(123, result["intNumber"]);
@@ -178,24 +187,25 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldUseBooleanConverter()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "status",
+                    Target = "isActive",
+                    Conversion = new List<string> { "boolean" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""status"",
-                        ""target"": ""isActive"",
-                        ""conversion"": [""boolean""],
-                        ""conversion_params"": {
-                            ""boolean"": {""output"": ""boolean""}
-                        }
+                        ["boolean"] = new { output = "boolean" }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""status"": ""yes""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal(true, result["isActive"]);
@@ -204,25 +214,26 @@ namespace ConfigLink.Tests
         [Fact]
         public void MappingEngine_ShouldChainMultipleConverters()
         {
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "rawText",
+                    Target = "processedText",
+                    Conversion = new List<string> { "trim", "case" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""rawText"",
-                        ""target"": ""processedText"",
-                        ""conversion"": [""trim"", ""case""],
-                        ""conversion_params"": {
-                            ""trim"": {""type"": ""both""},
-                            ""case"": {""case"": ""pascal""}
-                        }
+                        ["trim"] = new { type = "both" },
+                        ["case"] = new { @case = "pascal" }
                     }
-                ]
-            }";
+                }
+            };
 
             var sourceJson = @"{
                 ""rawText"": ""  hello world test  ""
             }";
 
-            var engine = new MappingEngine(mappingJson);
+            var engine = new MappingEngine(mappingRules);
             var result = engine.Transform(sourceJson);
 
             Assert.Equal("HelloWorldTest", result["processedText"]);

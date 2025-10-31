@@ -1,14 +1,24 @@
 using ConfigLink;
 using System.Text.Json;
+using System.Collections.Generic;
+using Xunit;
 
 namespace ConfigLink.Tests
 {
     public class MappingExampleTest
     {
+        private static List<MappingRule> ParseMappingJson(string json)
+        {
+            var doc = JsonDocument.Parse(json);
+            return doc.RootElement
+                      .GetProperty("mappings")
+                      .Deserialize<List<MappingRule>>()!;
+        }
+
         [Fact]
         public void TestFromJsonFile()
         {
-            var engine = new MappingEngine(File.ReadAllText("config/mapping.json"));
+            var engine = new MappingEngine(ParseMappingJson(File.ReadAllText("config/mapping.json")));
 
             var sourceJson = File.ReadAllText("config/sample_input.json");
 

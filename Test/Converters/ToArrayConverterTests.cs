@@ -21,7 +21,7 @@ namespace ConfigLink.Tests.Converters
             {
                 rule.ConversionParams = new Dictionary<string, object>();
                 
-                // 使用反射获取参数对象的属性
+                // 使用反射获取参数对象的属�?
                 var properties = conversionParams.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
@@ -31,8 +31,7 @@ namespace ConfigLink.Tests.Converters
                         // 对于数组参数，转换为JsonElement
                         if (value.GetType().IsArray || value.GetType().Name.Contains("List"))
                         {
-                            var jsonString = JsonSerializer.Serialize(value);
-                            var jsonElement = JsonSerializer.Deserialize<JsonElement>(jsonString);
+                            var jsonElement = JsonSerializer.SerializeToElement(value);
                             rule.ConversionParams[prop.Name] = jsonElement;
                         }
                         else
@@ -49,22 +48,18 @@ namespace ConfigLink.Tests.Converters
         private MappingEngine CreateTestEngine()
         {
             // Create a simple mapping engine for testing
-            var mappingJson = @"{
-                ""mappings"": [
-                    {
-                        ""source"": ""test"",
-                        ""target"": ""test""
-                    }
-                ]
-            }";
-            return new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "test", Target = "test" }
+            };
+            return new MappingEngine(mappingRules);
         }
 
         [Fact]
         public void ToArrayConverter_ShouldReturnNullForNonObject()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[\"not\", \"object\"]");
+            var value = JsonSerializer.SerializeToElement(new[] { "not", "object" });
             var rule = CreateRule("to_array", new { to_array = new[] { "field1", "field2" } });
             var engine = CreateTestEngine();
 
@@ -77,13 +72,13 @@ namespace ConfigLink.Tests.Converters
         public void ToArrayConverter_ShouldExtractFieldsToArray()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""street"": ""123 Main St"",
-                ""city"": ""Boston"",
-                ""state"": ""MA"",
-                ""zip"": ""02108"",
-                ""country"": ""USA""
-            }");
+            var value = JsonSerializer.SerializeToElement(new {
+                street = "123 Main St",
+                city = "Boston",
+                state = "MA",
+                zip = "02108",
+                country = "USA"
+            });
             
             var rule = CreateRule("to_array", new { to_array = new[] { "street", "city", "state", "zip" } });
             var engine = CreateTestEngine();
@@ -107,10 +102,10 @@ namespace ConfigLink.Tests.Converters
         public void ToArrayConverter_ShouldHandleMissingFields()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""name"": ""John"",
-                ""age"": 30
-            }");
+            var value = JsonSerializer.SerializeToElement(new {
+                name = "John",
+                age = 30
+            });
             
             var rule = CreateRule("to_array", new { to_array = new[] { "name", "missing", "age", "another_missing" } });
             var engine = CreateTestEngine();
@@ -134,18 +129,18 @@ namespace ConfigLink.Tests.Converters
         public void ToArrayConverter_ShouldHandleNestedFields()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""user"": {
-                    ""profile"": {
-                        ""firstName"": ""John"",
-                        ""lastName"": ""Doe""
+            var value = JsonSerializer.SerializeToElement(new {
+                user = new {
+                    profile = new {
+                        firstName = "John",
+                        lastName = "Doe"
                     },
-                    ""contact"": {
-                        ""email"": ""john@example.com""
+                    contact = new {
+                        email = "john@example.com"
                     }
                 },
-                ""id"": 12345
-            }");
+                id = 12345
+            });
             
             var rule = CreateRule("to_array", new { to_array = new[] { "user.profile.firstName", "user.profile.lastName", "user.contact.email", "id" } });
             var engine = CreateTestEngine();
@@ -166,10 +161,10 @@ namespace ConfigLink.Tests.Converters
         public void ToArrayConverter_ShouldHandleEmptyFieldsList()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""name"": ""John"",
-                ""age"": 30
-            }");
+            var value = JsonSerializer.SerializeToElement(new {
+                name = "John",
+                age = 30
+            });
             
             var rule = CreateRule("to_array", new { to_array = new string[0] });
             var engine = CreateTestEngine();
@@ -185,12 +180,12 @@ namespace ConfigLink.Tests.Converters
         public void ToArrayConverter_ShouldHandleArrayIndices()
         {
             var converter = new ToArrayConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""items"": [""first"", ""second"", ""third""],
-                ""data"": {
-                    ""values"": [100, 200, 300]
+            var value = JsonSerializer.SerializeToElement(new {
+                items = new[] { "first", "second", "third" },
+                data = new {
+                    values = new[] { 100, 200, 300 }
                 }
-            }");
+            });
             
             var rule = CreateRule("to_array", new { to_array = new[] { "items[0]", "items[2]", "data.values[1]" } });
             var engine = CreateTestEngine();

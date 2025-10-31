@@ -7,69 +7,47 @@ namespace ConfigLink.Tests
 {
     public class MappingEngineTests
     {
-        private const string BasicMappingJson = @"{
-            ""mappings"": [
-                {
-                    ""source"": ""name"",
-                    ""target"": ""username""
-                },
-                {
-                    ""source"": ""age"",
-                    ""target"": ""userAge""
-                }
-            ]
-        }";
+        private static readonly List<MappingRule> BasicMappingRules = new()
+        {
+            new MappingRule { Source = "name", Target = "username" },
+            new MappingRule { Source = "age", Target = "userAge" }
+        };
 
-        private const string ComplexMappingJson = @"{
-            ""mappings"": [
-                {
-                    ""source"": ""user.profile.name"",
-                    ""target"": ""displayName""
-                },
-                {
-                    ""source"": ""items[0]"",
-                    ""target"": ""firstItem""
-                },
-                {
-                    ""source"": ""nested.array[1].value"",
-                    ""target"": ""secondValue""
-                }
-            ]
-        }";
+        private static readonly List<MappingRule> ComplexMappingRules = new()
+        {
+            new MappingRule { Source = "user.profile.name", Target = "displayName" },
+            new MappingRule { Source = "items[0]", Target = "firstItem" },
+            new MappingRule { Source = "nested.array[1].value", Target = "secondValue" }
+        };
 
-        private const string RootTargetMappingJson = @"{
-            ""mappings"": [
-                {
-                    ""source"": ""data"",
-                    ""target"": ""$root"",
-                    ""conversion"": [""map_object""]
-                }
-            ]
-        }";
+        private static readonly List<MappingRule> RootTargetMappingRules = new()
+        {
+            new MappingRule { Source = "data", Target = "$root", Conversion = new List<string> { "map_object" } }
+        };
 
         [Fact]
         public void Constructor_ValidJson_ShouldInitializeSuccessfully()
         {
             // Act & Assert
-            var engine = new MappingEngine(BasicMappingJson);
+            var engine = new MappingEngine(BasicMappingRules);
             Assert.NotNull(engine);
         }
 
         [Fact]
-        public void Constructor_InvalidJson_ShouldThrowException()
+        public void Constructor_EmptyRules_ShouldInitializeSuccessfully()
         {
-            // Arrange
-            var invalidJson = "{ invalid json }";
-
-            // Act & Assert
-            Assert.ThrowsAny<Exception>(() => new MappingEngine(invalidJson));
+            // Arrange & Act
+            var engine = new MappingEngine(new List<MappingRule>());
+            
+            // Assert
+            Assert.NotNull(engine);
         }
 
         [Fact]
         public void Transform_BasicMapping_ShouldMapCorrectly()
         {
             // Arrange
-            var engine = new MappingEngine(BasicMappingJson);
+            var engine = new MappingEngine(BasicMappingRules);
             var sourceJson = @"{""name"": ""John"", ""age"": 30}";
 
             // Act
@@ -84,7 +62,7 @@ namespace ConfigLink.Tests
         public void Transform_MissingSourceProperty_ShouldSkipMapping()
         {
             // Arrange
-            var engine = new MappingEngine(BasicMappingJson);
+            var engine = new MappingEngine(BasicMappingRules);
             var sourceJson = @"{""name"": ""John""}"; // missing age
 
             // Act
@@ -99,7 +77,7 @@ namespace ConfigLink.Tests
         public void Transform_NestedPropertyAccess_ShouldMapCorrectly()
         {
             // Arrange
-            var engine = new MappingEngine(ComplexMappingJson);
+            var engine = new MappingEngine(ComplexMappingRules);
             var sourceJson = @"{
                 ""user"": {
                     ""profile"": {
@@ -128,13 +106,12 @@ namespace ConfigLink.Tests
         public void Transform_InvalidSourcePath_ShouldSkipMapping()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {""source"": ""nonexistent.path"", ""target"": ""result1""},
-                    {""source"": ""valid"", ""target"": ""result2""}
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "nonexistent.path", Target = "result1" },
+                new MappingRule { Source = "valid", Target = "result2" }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""valid"": ""value""}";
 
             // Act
@@ -149,13 +126,12 @@ namespace ConfigLink.Tests
         public void Transform_ArrayIndexOutOfBounds_ShouldSkipMapping()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {""source"": ""items[5]"", ""target"": ""outOfBounds""},
-                    {""source"": ""items[0]"", ""target"": ""valid""}
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "items[5]", Target = "outOfBounds" },
+                new MappingRule { Source = "items[0]", Target = "valid" }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""items"": [""first"", ""second""]}";
 
             // Act
@@ -170,16 +146,15 @@ namespace ConfigLink.Tests
         public void Transform_DifferentJsonValueTypes_ShouldMapCorrectly()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {""source"": ""stringVal"", ""target"": ""str""},
-                    {""source"": ""intVal"", ""target"": ""int""},
-                    {""source"": ""doubleVal"", ""target"": ""dbl""},
-                    {""source"": ""boolVal"", ""target"": ""bool""},
-                    {""source"": ""nullVal"", ""target"": ""null""}
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "stringVal", Target = "str" },
+                new MappingRule { Source = "intVal", Target = "int" },
+                new MappingRule { Source = "doubleVal", Target = "dbl" },
+                new MappingRule { Source = "boolVal", Target = "bool" },
+                new MappingRule { Source = "nullVal", Target = "null" }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""stringVal"": ""hello"",
                 ""intVal"": 42,
@@ -203,8 +178,8 @@ namespace ConfigLink.Tests
         public void Transform_EmptyMappings_ShouldReturnEmptyDictionary()
         {
             // Arrange
-            var emptyMappingJson = @"{""mappings"": []}";
-            var engine = new MappingEngine(emptyMappingJson);
+            var mappingRules = new List<MappingRule>();
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""name"": ""test""}";
 
             // Act
@@ -218,7 +193,7 @@ namespace ConfigLink.Tests
         public void Transform_EmptySourceJson_ShouldReturnEmptyDictionary()
         {
             // Arrange
-            var engine = new MappingEngine(BasicMappingJson);
+            var engine = new MappingEngine(BasicMappingRules);
             var sourceJson = @"{}";
 
             // Act
@@ -232,14 +207,13 @@ namespace ConfigLink.Tests
         public void Transform_ComplexNestedPaths_ShouldMapCorrectly()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {""source"": ""items[0].name"", ""target"": ""firstItemName""},
-                    {""source"": ""data.users[2].profile.email"", ""target"": ""thirdUserEmail""},
-                    {""source"": ""config.settings[0]"", ""target"": ""firstSetting""}
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "items[0].name", Target = "firstItemName" },
+                new MappingRule { Source = "data.users[2].profile.email", Target = "thirdUserEmail" },
+                new MappingRule { Source = "config.settings[0]", Target = "firstSetting" }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""items"": [{""name"": ""item1""}],
                 ""data"": {
@@ -267,19 +241,20 @@ namespace ConfigLink.Tests
         public void Transform_FormatConverter_ShouldFormatNumbers()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "price",
+                    Target = "formattedPrice",
+                    Conversion = new List<string> { "format" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""price"",
-                        ""target"": ""formattedPrice"",
-                        ""conversion"": [""format""],
-                        ""conversion_params"": {
-                            ""format"": ""F2""
-                        }
+                        { "format", "F2" }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""price"": 123.456}";
 
             // Act
@@ -293,19 +268,20 @@ namespace ConfigLink.Tests
         public void Transform_FormatConverter_ShouldFormatDates()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "date",
+                    Target = "formattedDate",
+                    Conversion = new List<string> { "format" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""date"",
-                        ""target"": ""formattedDate"",
-                        ""conversion"": [""format""],
-                        ""conversion_params"": {
-                            ""format"": ""yyyy-MM-dd""
-                        }
+                        { "format", "yyyy-MM-dd" }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""date"": ""2023-12-25T10:30:00""}";
 
             // Act
@@ -319,19 +295,20 @@ namespace ConfigLink.Tests
         public void Transform_PrependConverter_ShouldAddPrefix()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "name",
+                    Target = "prefixedName",
+                    Conversion = new List<string> { "prepend" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""name"",
-                        ""target"": ""prefixedName"",
-                        ""conversion"": [""prepend""],
-                        ""conversion_params"": {
-                            ""prepend"": ""Mr. ""
-                        }
+                        { "prepend", "Mr. " }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""name"": ""John""}";
 
             // Act
@@ -345,20 +322,21 @@ namespace ConfigLink.Tests
         public void Transform_ToArrayJoinConverter_ShouldJoinFields()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "address",
+                    Target = "fullAddress",
+                    Conversion = new List<string> { "to_array", "join" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""address"",
-                        ""target"": ""fullAddress"",
-                        ""conversion"": [""to_array"", ""join""],
-                        ""conversion_params"": {
-                            ""to_array"": [""street"", ""city"", ""state"", ""zip""],
-                            ""join"": "", ""
-                        }
+                        { "to_array", new[] { "street", "city", "state", "zip" } },
+                        { "join", ", " }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""address"": {
                     ""street"": ""123 Main St"",
@@ -379,20 +357,21 @@ namespace ConfigLink.Tests
         public void Transform_MultipleConversions_ShouldApplyInOrder()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "value",
+                    Target = "processedValue",
+                    Conversion = new List<string> { "prepend", "format" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""value"",
-                        ""target"": ""processedValue"",
-                        ""conversion"": [""prepend"", ""format""],
-                        ""conversion_params"": {
-                            ""prepend"": ""$ "",
-                            ""format"": ""F2""
-                        }
+                        { "prepend", "$ " },
+                        { "format", "F2" }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""value"": 100}";
 
             // Act
@@ -406,16 +385,16 @@ namespace ConfigLink.Tests
         public void Transform_UnknownConverter_ShouldReturnJsonElement()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {
-                        ""source"": ""name"",
-                        ""target"": ""processedName"",
-                        ""conversion"": [""unknown_converter""]
-                    }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "name",
+                    Target = "processedName",
+                    Conversion = new List<string> { "unknown_converter" }
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""name"": ""John""}";
 
             // Act
@@ -433,15 +412,15 @@ namespace ConfigLink.Tests
         public void Transform_NullConversion_ShouldReturnPrimitive()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {
-                        ""source"": ""name"",
-                        ""target"": ""simpleName""
-                    }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "name",
+                    Target = "simpleName"
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""name"": ""John""}";
 
             // Act
@@ -455,16 +434,16 @@ namespace ConfigLink.Tests
         public void Transform_EmptyConversionArray_ShouldReturnJsonElement()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
-                    {
-                        ""source"": ""name"",
-                        ""target"": ""simpleName"",
-                        ""conversion"": []
-                    }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "name",
+                    Target = "simpleName",
+                    Conversion = new List<string>()
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""name"": ""John""}";
 
             // Act
@@ -482,20 +461,21 @@ namespace ConfigLink.Tests
         public void Transform_ToArrayConverter_WithMissingFields_ShouldUseEmptyString()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "person",
+                    Target = "fullName",
+                    Conversion = new List<string> { "to_array", "join" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""person"",
-                        ""target"": ""fullName"",
-                        ""conversion"": [""to_array"", ""join""],
-                        ""conversion_params"": {
-                            ""to_array"": [""first"", ""middle"", ""last""],
-                            ""join"": "" ""
-                        }
+                        { "to_array", new[] { "first", "middle", "last" } },
+                        { "join", " " }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""person"": {
                     ""first"": ""John"",
@@ -514,22 +494,25 @@ namespace ConfigLink.Tests
         public void Transform_MapArrayConverter_ShouldTransformArrayElements()
         {
             // Arrange - This test assumes MapArrayConverter processes array elements
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "users",
+                    Target = "processedUsers",
+                    Conversion = new List<string> { "map_array" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""users"",
-                        ""target"": ""processedUsers"",
-                        ""conversion"": [""map_array""],
-                        ""conversion_params"": {
-                            ""map_array"": [
-                                {""source"": ""name"", ""target"": ""fullName""},
-                                {""source"": ""email"", ""target"": ""contact""}
-                            ]
+                        { "map_array", new[]
+                            {
+                                new { source = "name", target = "fullName" },
+                                new { source = "email", target = "contact" }
+                            }
                         }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""users"": [
                     {""name"": ""John"", ""email"": ""john@test.com""},
@@ -549,19 +532,20 @@ namespace ConfigLink.Tests
         public void Transform_FormatConverter_WithInvalidFormat_ShouldFallbackToRawText()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "text",
+                    Target = "formatted",
+                    Conversion = new List<string> { "format" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""text"",
-                        ""target"": ""formatted"",
-                        ""conversion"": [""format""],
-                        ""conversion_params"": {
-                            ""format"": ""invalid""
-                        }
+                        { "format", "invalid" }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""text"": ""hello world""}";
 
             // Act
@@ -575,19 +559,20 @@ namespace ConfigLink.Tests
         public void Transform_ConversionWithNullValue_ShouldHandleGracefully()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "nullable",
+                    Target = "processed",
+                    Conversion = new List<string> { "prepend" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""nullable"",
-                        ""target"": ""processed"",
-                        ""conversion"": [""prepend""],
-                        ""conversion_params"": {
-                            ""prepend"": ""prefix: ""
-                        }
+                        { "prepend", "prefix: " }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{""nullable"": null}";
 
             // Act
@@ -601,20 +586,21 @@ namespace ConfigLink.Tests
         public void Transform_ComplexConversionChain_ShouldApplyAllSteps()
         {
             // Arrange
-            var mappingJson = @"{
-                ""mappings"": [
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule
+                {
+                    Source = "data",
+                    Target = "complexResult",
+                    Conversion = new List<string> { "to_array", "join" },
+                    ConversionParams = new Dictionary<string, object>
                     {
-                        ""source"": ""data"",
-                        ""target"": ""complexResult"",
-                        ""conversion"": [""to_array"", ""join""],
-                        ""conversion_params"": {
-                            ""to_array"": [""first"", ""second""],
-                            ""join"": "" | ""
-                        }
+                        { "to_array", new[] { "first", "second" } },
+                        { "join", " | " }
                     }
-                ]
-            }";
-            var engine = new MappingEngine(mappingJson);
+                }
+            };
+            var engine = new MappingEngine(mappingRules);
             var sourceJson = @"{
                 ""data"": {
                     ""first"": ""A"",

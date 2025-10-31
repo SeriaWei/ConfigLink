@@ -11,11 +11,8 @@ namespace Test.Api
     {
         public static async Task RunExamples()
         {
-            // 1. 使用ApiManager直接发送场景数据
+            // 1. 使用ApiManager直接发送场景数�?
             await ApiManagerScenarioExample();
-
-            // 2. 使用MappingEngineWithApi发送场景数据
-            await MappingEngineScenarioExample();
         }
 
         /// <summary>
@@ -29,7 +26,7 @@ namespace Test.Api
             var apiConfigJson = await File.ReadAllTextAsync("config/api.config.json");
             var scenarioConfigJson = await File.ReadAllTextAsync("config/scenario.json");
 
-            // 创建ApiManager，支持场景配置
+            // 创建ApiManager，支持场景配�?
             var apiConfigs = ApiConfigs.LoadFromJson(apiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(scenarioConfigJson);
             using var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
@@ -46,7 +43,7 @@ namespace Test.Api
             var scenarios = apiManager.GetAvailableScenarios();
             Console.WriteLine($"Available scenarios: {string.Join(", ", scenarios)}");
 
-            // 发送到"subscribe"场景的所有平台
+            // 发送到"subscribe"场景的所有平�?
             var results = await apiManager.SendAsync("subscribe", userData);
 
             Console.WriteLine("Results:");
@@ -61,57 +58,7 @@ namespace Test.Api
         }
 
         /// <summary>
-        /// ApiManager with MappingEngine场景示例
-        /// </summary>
-        private static async Task MappingEngineScenarioExample()
-        {
-            Console.WriteLine("=== ApiManager with MappingEngine Scenario Example ===");
-
-            // 读取配置
-            var mappingJson = await File.ReadAllTextAsync("config/mapping.json");
-            var apiConfigJson = await File.ReadAllTextAsync("config/api.config.json");
-            var scenarioConfigJson = await File.ReadAllTextAsync("config/scenario.json");
-
-            // 创建映射引擎和ApiManager，支持映射和场景配置
-            var mappingEngine = new MappingEngine(mappingJson);
-            var apiConfigs = ApiConfigs.LoadFromJson(apiConfigJson);
-            var scenarioConfigs = ScenarioConfigs.LoadFromJson(scenarioConfigJson);
-            using var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
-
-            // 准备测试数据
-            var sourceData = new
-            {
-                email = "user@example.com",
-                firstName = "John",
-                lastName = "Doe"
-            };
-
-            // 获取可用场景
-            var scenarios = apiManager.GetAvailableScenarios();
-            Console.WriteLine($"Available scenarios: {string.Join(", ", scenarios)}");
-
-            // 方式1：发送对象数据到场景
-            var results1 = await apiManager.SendAsync("subscribe", sourceData);
-            Console.WriteLine("Object data results:");
-            foreach (var result in results1)
-            {
-                Console.WriteLine($"Platform: {result.Key} - Success: {result.Value.Success}");
-            }
-
-            // 方式2：转换JSON数据并发送到场景
-            var sourceJson = JsonSerializer.Serialize(sourceData);
-            var (mappedData, results2) = await apiManager.TransformAndSendAsync("subscribe", sourceJson);
-            
-            Console.WriteLine("Transformed JSON data results:");
-            Console.WriteLine($"Mapped data: {JsonSerializer.Serialize(mappedData)}");
-            foreach (var result in results2)
-            {
-                Console.WriteLine($"Platform: {result.Key} - Success: {result.Value.Success}");
-            }
-        }
-
-        /// <summary>
-        /// 演示具体平台配置的映射规则
+        /// 演示具体平台配置的映射规�?
         /// </summary>
         private static async Task DemonstrateMapping()
         {
@@ -129,7 +76,7 @@ namespace Test.Api
                 lastName = "Doe"
             };
 
-            // 查看每个平台的可用平台
+            // 查看每个平台的可用平�?
             var platformsInSubscribe = apiManager.GetAvailablePlatforms("subscribe");
             Console.WriteLine($"Platforms in 'subscribe' scenario: {string.Join(", ", platformsInSubscribe)}");
 

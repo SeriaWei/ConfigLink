@@ -19,7 +19,7 @@ namespace ConfigLink.Tests.Converters
 
             if (conversionParams != null)
             {
-                // 直接使用转换器类型和参数创建正确的嵌套结构
+                // 直接使用转换器类型和参数创建正确的嵌套结�?
                 var innerParamsJson = JsonSerializer.Serialize(conversionParams);
                 var outerJson = $@"{{ ""{converterType.ToLowerInvariant()}"": {innerParamsJson} }}";
                 
@@ -33,7 +33,7 @@ namespace ConfigLink.Tests.Converters
         public void SubstringConverter_ShouldExtractSubstring()
         {
             var converter = new SubstringConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"hello world\"");
+            var value = JsonSerializer.SerializeToElement("hello world");
             var rule = CreateRule("substring", new { start = 0, length = 5 });
 
             var result = converter.Convert(value, rule, null!);

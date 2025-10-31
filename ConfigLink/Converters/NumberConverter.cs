@@ -19,8 +19,9 @@ namespace ConfigLink.Converters
             string? format = null;
             string culture = "invariant";
             
-            if (rule.ConversionParams?.TryGetValue("number", out var numberParams) == true && numberParams is JsonElement numberElement)
+            if (rule.ConversionParams?.TryGetValue("number", out var numberParams) == true)
             {
+                var numberElement = numberParams is JsonElement je ? je : JsonSerializer.SerializeToElement(numberParams);
                 if (numberElement.ValueKind == JsonValueKind.String)
                 {
                     // 简化格式：直接是字符串值，表示 type

@@ -13,12 +13,13 @@ namespace ConfigLink.Converters
         {
             if (value.ValueKind != JsonValueKind.Object) return null;
 
-            var fields = rule.ConversionParams?["to_array"] as JsonElement?;
+            var fields = rule.ConversionParams?["to_array"];
+            var fieldsElement = fields is JsonElement je ? je : JsonSerializer.SerializeToElement(fields);
 
             var list = new List<object?>();
-            if (fields?.ValueKind == JsonValueKind.Array)
+            if (fieldsElement.ValueKind == JsonValueKind.Array)
             {
-                foreach (var f in fields.Value.EnumerateArray())
+                foreach (var f in fieldsElement.EnumerateArray())
                 {
                     var path = f.GetString()!;
                     var v = engine.GetValueByPath(value, path);

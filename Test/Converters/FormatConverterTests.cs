@@ -21,7 +21,7 @@ namespace ConfigLink.Tests.Converters
             {
                 rule.ConversionParams = new Dictionary<string, object>();
                 
-                // 使用反射获取参数对象的属性
+                // 使用反射获取参数对象的属�?
                 var properties = conversionParams.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
@@ -40,7 +40,7 @@ namespace ConfigLink.Tests.Converters
         public void FormatConverter_ShouldFormatNumber()
         {
             var converter = new FormatConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("123.456");
+            var value = JsonSerializer.SerializeToElement(123.456);
             var rule = CreateRule("format", new { format = "F2" });
 
             var result = converter.Convert(value, rule, null!);
@@ -52,7 +52,7 @@ namespace ConfigLink.Tests.Converters
         public void FormatConverter_ShouldFormatCurrency()
         {
             var converter = new FormatConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("1234.56");
+            var value = JsonSerializer.SerializeToElement(1234.56);
             var rule = CreateRule("format", new { format = "C" });
 
             var result = converter.Convert(value, rule, null!);
@@ -67,7 +67,7 @@ namespace ConfigLink.Tests.Converters
         public void FormatConverter_ShouldFormatDate()
         {
             var converter = new FormatConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"2023-01-15T10:30:00\"");
+            var value = JsonSerializer.SerializeToElement("2023-01-15T10:30:00");
             var rule = CreateRule("format", new { format = "yyyy-MM-dd" });
 
             var result = converter.Convert(value, rule, null!);
@@ -79,7 +79,7 @@ namespace ConfigLink.Tests.Converters
         public void FormatConverter_ShouldReturnRawTextForInvalidInput()
         {
             var converter = new FormatConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"not a date or number\"");
+            var value = JsonSerializer.SerializeToElement("not a date or number");
             var rule = CreateRule("format", new { format = "yyyy-MM-dd" });
 
             var result = converter.Convert(value, rule, null!);
@@ -91,7 +91,7 @@ namespace ConfigLink.Tests.Converters
         public void FormatConverter_ShouldHandleEmptyFormat()
         {
             var converter = new FormatConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("123.456");
+            var value = JsonSerializer.SerializeToElement(123.456);
             var rule = CreateRule("format", new { format = "" });
 
             var result = converter.Convert(value, rule, null!);

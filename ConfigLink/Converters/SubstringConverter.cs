@@ -19,25 +19,26 @@ namespace ConfigLink.Converters
             string? startParam = null;
             string? lengthParam = null;
             string? endParam = null;
-            
-            if (rule.ConversionParams?.TryGetValue("substring", out var substringParams) == true && substringParams is JsonElement substringElement)
+
+            if (rule.ConversionParams?.TryGetValue("substring", out var substringParams) == true)
             {
+                var substringElement = substringParams is JsonElement je ? je : JsonSerializer.SerializeToElement(substringParams);
                 if (substringElement.TryGetProperty("start", out var startProperty))
                 {
-                    startParam = startProperty.ValueKind == JsonValueKind.Number ? 
-                                startProperty.GetInt32().ToString() : 
+                    startParam = startProperty.ValueKind == JsonValueKind.Number ?
+                                startProperty.GetInt32().ToString() :
                                 startProperty.GetString();
                 }
                 if (substringElement.TryGetProperty("length", out var lengthProperty))
                 {
-                    lengthParam = lengthProperty.ValueKind == JsonValueKind.Number ? 
-                                 lengthProperty.GetInt32().ToString() : 
+                    lengthParam = lengthProperty.ValueKind == JsonValueKind.Number ?
+                                 lengthProperty.GetInt32().ToString() :
                                  lengthProperty.GetString();
                 }
                 if (substringElement.TryGetProperty("end", out var endProperty))
                 {
-                    endParam = endProperty.ValueKind == JsonValueKind.Number ? 
-                              endProperty.GetInt32().ToString() : 
+                    endParam = endProperty.ValueKind == JsonValueKind.Number ?
+                              endProperty.GetInt32().ToString() :
                               endProperty.GetString();
                 }
             }

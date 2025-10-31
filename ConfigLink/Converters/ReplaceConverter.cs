@@ -21,9 +21,10 @@ namespace ConfigLink.Converters
             string replace = "";
             bool useRegex = false;
             bool ignoreCase = false;
-            
-            if (rule.ConversionParams?.TryGetValue("replace", out var replaceParams) == true && replaceParams is JsonElement replaceElement)
+
+            if (rule.ConversionParams?.TryGetValue("replace", out var replaceParams) == true)
             {
+                var replaceElement = replaceParams is JsonElement je ? je : JsonSerializer.SerializeToElement(replaceParams);
                 if (replaceElement.TryGetProperty("from", out var fromProperty))
                 {
                     search = fromProperty.GetString();
@@ -32,7 +33,7 @@ namespace ConfigLink.Converters
                 {
                     search = searchProperty.GetString();
                 }
-                
+
                 if (replaceElement.TryGetProperty("to", out var toProperty))
                 {
                     replace = toProperty.GetString() ?? "";
@@ -41,17 +42,17 @@ namespace ConfigLink.Converters
                 {
                     replace = replaceProperty.GetString() ?? "";
                 }
-                
+
                 if (replaceElement.TryGetProperty("useRegex", out var useRegexProperty))
                 {
-                    useRegex = useRegexProperty.ValueKind == JsonValueKind.True || 
-                              (useRegexProperty.ValueKind == JsonValueKind.String && 
+                    useRegex = useRegexProperty.ValueKind == JsonValueKind.True ||
+                              (useRegexProperty.ValueKind == JsonValueKind.String &&
                                useRegexProperty.GetString()?.ToLowerInvariant() == "true");
                 }
                 else if (replaceElement.TryGetProperty("regex", out var regexProperty))
                 {
-                    useRegex = regexProperty.ValueKind == JsonValueKind.True || 
-                              (regexProperty.ValueKind == JsonValueKind.String && 
+                    useRegex = regexProperty.ValueKind == JsonValueKind.True ||
+                              (regexProperty.ValueKind == JsonValueKind.String &&
                                regexProperty.GetString()?.ToLowerInvariant() == "true");
                 }
                 if (replaceElement.TryGetProperty("ignoreCase", out var ignoreCaseProperty))

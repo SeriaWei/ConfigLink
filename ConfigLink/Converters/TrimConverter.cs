@@ -21,8 +21,9 @@ namespace ConfigLink.Converters
             string trimType = "both";
             string? trimChars = null;
             
-            if (rule.ConversionParams?.TryGetValue("trim", out var trimParams) == true && trimParams is JsonElement trimElement)
+            if (rule.ConversionParams?.TryGetValue("trim", out var trimParams) == true)
             {
+                var trimElement = trimParams is JsonElement je ? je : JsonSerializer.SerializeToElement(trimParams);
                 if (trimElement.ValueKind == JsonValueKind.String)
                 {
                     // 简化格式：直接是字符串值，表示 type

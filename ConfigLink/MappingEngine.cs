@@ -13,12 +13,9 @@ namespace ConfigLink
         private readonly List<MappingRule> _rules;
         private readonly Dictionary<string, IConverter> _converters;
 
-        public MappingEngine(string json)
+        public MappingEngine(List<MappingRule> rules)
         {
-            var doc = JsonDocument.Parse(json);
-            _rules = doc.RootElement
-                        .GetProperty("mappings")
-                        .Deserialize<List<MappingRule>>()!;
+            _rules = rules;
 
             // 注册所有 converter
             _converters = new()

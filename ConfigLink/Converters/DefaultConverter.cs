@@ -14,9 +14,10 @@ namespace ConfigLink.Converters
             // 尝试从 "default" 键下获取参数
             object? defaultValueObj = null;
             string condition = "null";
-            
-            if (rule.ConversionParams?.TryGetValue("default", out var defaultParams) == true && defaultParams is JsonElement defaultElement)
+
+            if (rule.ConversionParams?.TryGetValue("default", out var defaultParams) == true)
             {
+                var defaultElement = defaultParams is JsonElement je ? je : JsonSerializer.SerializeToElement(defaultParams);
                 if (defaultElement.TryGetProperty("value", out var valueProperty))
                 {
                     if (valueProperty.ValueKind == JsonValueKind.String)
@@ -71,7 +72,7 @@ namespace ConfigLink.Converters
 
         private static bool IsWhitespace(JsonElement value)
         {
-            return value.ValueKind == JsonValueKind.String && 
+            return value.ValueKind == JsonValueKind.String &&
                    string.IsNullOrWhiteSpace(value.GetString());
         }
     }

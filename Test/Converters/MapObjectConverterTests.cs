@@ -21,14 +21,13 @@ namespace ConfigLink.Tests.Converters
             {
                 rule.ConversionParams = new Dictionary<string, object>();
                 
-                // 使用反射获取参数对象的属性
+                // 使用反射获取参数对象的属�?
                 var properties = conversionParams.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
                     var value = prop.GetValue(conversionParams);
                     if (value != null)
                     {
-                        // 对于map_object参数，直接序列化数组值
                         rule.ConversionParams[prop.Name] = value;
                     }
                 }
@@ -40,22 +39,18 @@ namespace ConfigLink.Tests.Converters
         private MappingEngine CreateTestEngine()
         {
             // Create a simple mapping engine for testing
-            var mappingJson = @"{
-                ""mappings"": [
-                    {
-                        ""source"": ""test"",
-                        ""target"": ""test""
-                    }
-                ]
-            }";
-            return new MappingEngine(mappingJson);
+            var mappingRules = new List<MappingRule>
+            {
+                new MappingRule { Source = "test", Target = "test" }
+            };
+            return new MappingEngine(mappingRules);
         }
 
         [Fact]
         public void MapObjectConverter_ShouldReturnNullForNonObject()
         {
             var converter = new MapObjectConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[\"not\", \"object\"]");
+            var value = JsonSerializer.SerializeToElement(new[] { "not", "object" });
             var rule = CreateRule("map_object", new { map_object = new object[0] });
             var engine = CreateTestEngine();
 
@@ -68,12 +63,12 @@ namespace ConfigLink.Tests.Converters
         public void MapObjectConverter_ShouldTransformObject()
         {
             var converter = new MapObjectConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""firstName"": ""John"",
-                ""lastName"": ""Doe"",
-                ""age"": 30,
-                ""email"": ""john.doe@example.com""
-            }");
+            var value = JsonSerializer.SerializeToElement(new {
+                firstName = "John",
+                lastName = "Doe",
+                age = 30,
+                email = "john.doe@example.com"
+            });
             
             var subRules = new[]
             {
@@ -102,19 +97,19 @@ namespace ConfigLink.Tests.Converters
         public void MapObjectConverter_ShouldHandleNestedObjects()
         {
             var converter = new MapObjectConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""user"": {
-                    ""profile"": {
-                        ""name"": ""Jane Smith""
+            var value = JsonSerializer.SerializeToElement(new {
+                user = new {
+                    profile = new {
+                        name = "Jane Smith"
                     },
-                    ""settings"": {
-                        ""theme"": ""dark""
+                    settings = new {
+                        theme = "dark"
                     }
                 },
-                ""metadata"": {
-                    ""created"": ""2023-01-01""
+                metadata = new {
+                    created = "2023-01-01"
                 }
-            }");
+            });
             
             var subRules = new[]
             {
@@ -139,7 +134,7 @@ namespace ConfigLink.Tests.Converters
         public void MapObjectConverter_ShouldHandleEmptyObject()
         {
             var converter = new MapObjectConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("{}");
+            var value = JsonSerializer.SerializeToElement(new { });
             var rule = CreateRule("map_object", new { map_object = new[] { new { source = "nonexistent", target = "missing" } } });
             var engine = CreateTestEngine();
 
@@ -156,10 +151,10 @@ namespace ConfigLink.Tests.Converters
         public void MapObjectConverter_ShouldSkipMissingProperties()
         {
             var converter = new MapObjectConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>(@"{
-                ""name"": ""John"",
-                ""age"": 25
-            }");
+            var value = JsonSerializer.SerializeToElement(new {
+                name = "John",
+                age = 25
+            });
             
             var subRules = new[]
             {

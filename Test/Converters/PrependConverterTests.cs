@@ -21,7 +21,7 @@ namespace ConfigLink.Tests.Converters
             {
                 rule.ConversionParams = new Dictionary<string, object>();
                 
-                // 使用反射获取参数对象的属性
+                // 使用反射获取参数对象的属�?
                 var properties = conversionParams.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
@@ -63,7 +63,7 @@ namespace ConfigLink.Tests.Converters
         public void PrependConverter_ShouldPrependToString()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"world\"");
+            var value = JsonSerializer.SerializeToElement("world");
             var rule = CreateRule("prepend", new { prepend = "Hello " });
 
             var result = converter.Convert(value, rule, null!);
@@ -75,7 +75,7 @@ namespace ConfigLink.Tests.Converters
         public void PrependConverter_ShouldPrependToNumber()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("123");
+            var value = JsonSerializer.SerializeToElement(123);
             var rule = CreateRule("prepend", new { prepend = "Number: " });
 
             var result = converter.Convert(value, rule, null!);
@@ -87,7 +87,7 @@ namespace ConfigLink.Tests.Converters
         public void PrependConverter_ShouldHandleNullValue()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("null");
+            var value = JsonSerializer.SerializeToElement((string?)null);
             var rule = CreateRule("prepend", new { prepend = "Prefix" });
 
             var result = converter.Convert(value, rule, null!);
@@ -99,20 +99,20 @@ namespace ConfigLink.Tests.Converters
         public void PrependConverter_ShouldPrependToArray()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[1, 2, 3]");
+            var value = JsonSerializer.SerializeToElement(new[] { 1, 2, 3 });
             var rule = CreateRule("prepend", new { prepend = "Array: " });
 
             var result = converter.Convert(value, rule, null!);
 
-            // The actual result includes spaces in JSON format
-            Assert.Equal("Array: [1, 2, 3]", result);
+            // The actual result uses compact JSON format without spaces
+            Assert.Equal("Array: [1,2,3]", result);
         }
 
         [Fact]
         public void PrependConverter_ShouldHandleEmptyPrefix()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"test\"");
+            var value = JsonSerializer.SerializeToElement("test");
             var rule = CreateRule("prepend", new { prepend = "" });
 
             var result = converter.Convert(value, rule, null!);
@@ -124,7 +124,7 @@ namespace ConfigLink.Tests.Converters
         public void PrependConverter_ShouldSupportSimplifiedFormat()
         {
             var converter = new PrependConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"text\"");
+            var value = JsonSerializer.SerializeToElement("text");
             var rule = CreateSimplifiedRule("prepend", "PREFIX: ");
 
             var result = converter.Convert(value, rule, null!);

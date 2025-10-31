@@ -19,8 +19,9 @@ namespace ConfigLink.Converters
             string? falseValuesParam = null;
             string outputFormat = "boolean";
             
-            if (rule.ConversionParams?.TryGetValue("boolean", out var booleanParams) == true && booleanParams is JsonElement booleanElement)
+            if (rule.ConversionParams?.TryGetValue("boolean", out var booleanParams) == true)
             {
+                var booleanElement = booleanParams is JsonElement je ? je : JsonSerializer.SerializeToElement(booleanParams);
                 if (booleanElement.ValueKind == JsonValueKind.String)
                 {
                     // 简化格式：直接是字符串值，表示 output 格式

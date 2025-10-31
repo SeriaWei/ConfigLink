@@ -21,8 +21,9 @@ namespace ConfigLink.Converters
             // 1. 简化格式：{"case": "upper"}
             // 2. 完整格式：{"case": {"case": "upper"}}
             string caseType = "lower";
-            if (rule.ConversionParams?.TryGetValue("case", out var caseParams) == true && caseParams is JsonElement caseElement)
+            if (rule.ConversionParams?.TryGetValue("case", out var caseParams) == true)
             {
+                var caseElement = caseParams is JsonElement je ? je : JsonSerializer.SerializeToElement(caseParams);
                 if (caseElement.ValueKind == JsonValueKind.String)
                 {
                     // 简化格式：直接是字符串值

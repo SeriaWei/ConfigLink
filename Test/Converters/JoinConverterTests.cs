@@ -21,7 +21,7 @@ namespace ConfigLink.Tests.Converters
             {
                 rule.ConversionParams = new Dictionary<string, object>();
                 
-                // 使用反射获取参数对象的属性
+                // 使用反射获取参数对象的属�?
                 var properties = conversionParams.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
@@ -63,7 +63,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldJoinArrayWithComma()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[\"apple\", \"banana\", \"cherry\"]");
+            var value = JsonSerializer.SerializeToElement(new[] { "apple", "banana", "cherry" });
             var rule = CreateRule("join", new { join = ", " });
 
             var result = converter.Convert(value, rule, null!);
@@ -75,7 +75,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldJoinArrayWithCustomSeparator()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[\"one\", \"two\", \"three\"]");
+            var value = JsonSerializer.SerializeToElement(new[] { "one", "two", "three" });
             var rule = CreateRule("join", new { join = " | " });
 
             var result = converter.Convert(value, rule, null!);
@@ -87,7 +87,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldJoinObjectValues()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("{\"a\": \"value1\", \"b\": \"value2\", \"c\": \"value3\"}");
+            var value = JsonSerializer.SerializeToElement(new { a = "value1", b = "value2", c = "value3" });
             var rule = CreateRule("join", new { join = "-" });
 
             var result = converter.Convert(value, rule, null!);
@@ -99,7 +99,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldHandleEmptyArray()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[]");
+            var value = JsonSerializer.SerializeToElement(new object[0]);
             var rule = CreateRule("join", new { join = ", " });
 
             var result = converter.Convert(value, rule, null!);
@@ -111,7 +111,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldReturnStringForNonArrayValue()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"single value\"");
+            var value = JsonSerializer.SerializeToElement("single value");
             var rule = CreateRule("join", new { join = ", " });
 
             var result = converter.Convert(value, rule, null!);
@@ -123,7 +123,7 @@ namespace ConfigLink.Tests.Converters
         public void JoinConverter_ShouldSupportSimplifiedFormat()
         {
             var converter = new JoinConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("[\"a\", \"b\", \"c\"]");
+            var value = JsonSerializer.SerializeToElement(new[] { "a", "b", "c" });
             var rule = CreateSimplifiedRule("join", ";");
 
             var result = converter.Convert(value, rule, null!);

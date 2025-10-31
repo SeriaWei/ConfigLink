@@ -19,7 +19,6 @@ namespace ConfigLink.Tests.Converters
 
             if (conversionParams != null)
             {
-                // 直接使用转换器类型和参数创建正确的嵌套结构
                 var innerParamsJson = JsonSerializer.Serialize(conversionParams);
                 var outerJson = $@"{{ ""{converterType.ToLowerInvariant()}"": {innerParamsJson} }}";
                 
@@ -56,7 +55,7 @@ namespace ConfigLink.Tests.Converters
         public void BooleanConverter_ShouldConvertStringToBoolean()
         {
             var converter = new BooleanConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("\"yes\"");
+            var value = JsonSerializer.SerializeToElement("yes");
             var rule = CreateRule("boolean", new { output = "boolean" });
 
             var result = converter.Convert(value, rule, null!);
@@ -68,7 +67,7 @@ namespace ConfigLink.Tests.Converters
         public void BooleanConverter_ShouldConvertToYesNoFormat()
         {
             var converter = new BooleanConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("true");
+            var value = JsonSerializer.SerializeToElement(true);
             var rule = CreateRule("boolean", new { output = "yesno" });
 
             var result = converter.Convert(value, rule, null!);
@@ -80,7 +79,7 @@ namespace ConfigLink.Tests.Converters
         public void BooleanConverter_ShouldSupportSimplifiedFormat()
         {
             var converter = new BooleanConverter();
-            var value = JsonSerializer.Deserialize<JsonElement>("true");
+            var value = JsonSerializer.SerializeToElement(true);
             var rule = CreateSimplifiedRule("boolean", "yesno");
 
             var result = converter.Convert(value, rule, null!);

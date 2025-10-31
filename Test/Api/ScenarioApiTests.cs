@@ -2,6 +2,7 @@ using ConfigLink;
 using ConfigLink.Api;
 using Xunit;
 using System.Text.Json;
+using System.Collections.Generic;
 
 namespace Test.Api
 {
@@ -109,12 +110,6 @@ namespace Test.Api
         [Fact]
         public void TestApiManagerWithMappingEngine()
         {
-            // 测试ApiManager支持映射引擎
-            var mappingJson = @"{
-                ""mappings"": []
-            }";
-
-            var mappingEngine = new MappingEngine(mappingJson);
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
             var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
@@ -154,7 +149,7 @@ namespace Test.Api
             Assert.NotNull(platformAConfig);
             Assert.NotNull(platformBConfig);
 
-            // 验证PlatformA的映射规则
+            // 验证PlatformA的映射规�?
             var platformAMappings = platformAConfig.Mappings;
             Assert.Equal("email", platformAMappings[0].Source);
             Assert.Equal("emailAddress", platformAMappings[0].Target);
@@ -163,7 +158,7 @@ namespace Test.Api
             Assert.Equal("lastName", platformAMappings[2].Source);
             Assert.Equal("lastName", platformAMappings[2].Target);
 
-            // 验证PlatformB的映射规则
+            // 验证PlatformB的映射规�?
             var platformBMappings = platformBConfig.Mappings;
             Assert.Equal("email", platformBMappings[0].Source);
             Assert.Equal("email", platformBMappings[0].Target);
