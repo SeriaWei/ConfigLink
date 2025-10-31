@@ -37,11 +37,11 @@ namespace ConfigLink
         }
 
         /// <summary>
-        /// 入口：把 sourceJson 转换成目标字典
+        /// 入口：把源对象转换成目标字典
         /// </summary>
-        public Dictionary<string, object?> Transform(string sourceJson)
+        public Dictionary<string, object?> Transform(object sourceObj)
         {
-            var root = JsonDocument.Parse(sourceJson).RootElement;
+            JsonElement root=JsonSerializer.SerializeToElement(sourceObj);
             return Process(root, _rules);
         }
 

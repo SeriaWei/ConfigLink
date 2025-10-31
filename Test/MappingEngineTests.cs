@@ -48,10 +48,10 @@ namespace ConfigLink.Tests
         {
             // Arrange
             var engine = new MappingEngine(BasicMappingRules);
-            var sourceJson = @"{""name"": ""John"", ""age"": 30}";
+            var sourceObj = new { name = "John", age = 30 };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("John", result["username"]);
@@ -63,10 +63,10 @@ namespace ConfigLink.Tests
         {
             // Arrange
             var engine = new MappingEngine(BasicMappingRules);
-            var sourceJson = @"{""name"": ""John""}"; // missing age
+            var sourceObj = new { name = "John" }; // missing age
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("John", result["username"]);
@@ -78,23 +78,26 @@ namespace ConfigLink.Tests
         {
             // Arrange
             var engine = new MappingEngine(ComplexMappingRules);
-            var sourceJson = @"{
-                ""user"": {
-                    ""profile"": {
-                        ""name"": ""Jane""
+            var sourceObj = new
+            {
+                user = new
+                {
+                    profile = new
+                    {
+                        name = "Jane"
                     }
                 },
-                ""items"": [""first"", ""second""],
-                ""nested"": {
-                    ""array"": [
-                        {""value"": ""val1""},
-                        {""value"": ""val2""}
-                    ]
+                items = new[] { "first", "second" },
+                nested = new
+                {
+                    array = new[]
+                    {
+                        new { value = "val1" },
+                        new { value = "val2" }
+                    }
                 }
-            }";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("Jane", result["displayName"]);
@@ -112,10 +115,8 @@ namespace ConfigLink.Tests
                 new MappingRule { Source = "valid", Target = "result2" }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""valid"": ""value""}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { valid = "value" };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.False(result.ContainsKey("result1")); // nonexistent path should be skipped
@@ -132,10 +133,8 @@ namespace ConfigLink.Tests
                 new MappingRule { Source = "items[0]", Target = "valid" }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""items"": [""first"", ""second""]}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { items = new[] { "first", "second" } };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.False(result.ContainsKey("outOfBounds")); // out of bounds should be skipped
@@ -155,16 +154,15 @@ namespace ConfigLink.Tests
                 new MappingRule { Source = "nullVal", Target = "null" }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""stringVal"": ""hello"",
-                ""intVal"": 42,
-                ""doubleVal"": 3.14,
-                ""boolVal"": true,
-                ""nullVal"": null
-            }";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new
+            {
+                stringVal = "hello",
+                intVal = 42,
+                doubleVal = 3.14,
+                boolVal = true,
+                nullVal = default(object)
+            };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("hello", result["str"]);
@@ -180,10 +178,8 @@ namespace ConfigLink.Tests
             // Arrange
             var mappingRules = new List<MappingRule>();
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""name"": ""test""}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { name = "test" };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Empty(result);
@@ -194,10 +190,8 @@ namespace ConfigLink.Tests
         {
             // Arrange
             var engine = new MappingEngine(BasicMappingRules);
-            var sourceJson = @"{}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Empty(result);
@@ -214,22 +208,24 @@ namespace ConfigLink.Tests
                 new MappingRule { Source = "config.settings[0]", Target = "firstSetting" }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""items"": [{""name"": ""item1""}],
-                ""data"": {
-                    ""users"": [
-                        {""profile"": {""email"": ""user1@test.com""}},
-                        {""profile"": {""email"": ""user2@test.com""}},
-                        {""profile"": {""email"": ""user3@test.com""}}
-                    ]
+            var sourceObj = new
+            {
+                items = new[] { new { name = "item1" } },
+                data = new
+                {
+                    users = new[]
+                    {
+                        new { profile = new { email = "user1@test.com" } },
+                        new { profile = new { email = "user2@test.com" } },
+                        new { profile = new { email = "user3@test.com" } }
+                    }
                 },
-                ""config"": {
-                    ""settings"": [""setting1"", ""setting2""]
+                config = new
+                {
+                    settings = new[] { "setting1", "setting2" }
                 }
-            }";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("item1", result["firstItemName"]);
@@ -255,10 +251,8 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""price"": 123.456}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { price = 123.456 };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("123.46", result["formattedPrice"]);
@@ -282,10 +276,8 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""date"": ""2023-12-25T10:30:00""}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { date = "2023-12-25T10:30:00" };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("2023-12-25", result["formattedDate"]);
@@ -309,10 +301,8 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""name"": ""John""}";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { name = "John" };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("Mr. John", result["prefixedName"]);
@@ -337,17 +327,17 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""address"": {
-                    ""street"": ""123 Main St"",
-                    ""city"": ""Boston"",
-                    ""state"": ""MA"",
-                    ""zip"": ""02108""
+            var sourceObj = new
+            {
+                address = new
+                {
+                    street = "123 Main St",
+                    city = "Boston",
+                    state = "MA",
+                    zip = "02108"
                 }
-            }";
-
-            // Act
-            var result = engine.Transform(sourceJson);
+            };
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("123 Main St, Boston, MA, 02108", result["fullAddress"]);
@@ -372,10 +362,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""value"": 100}";
+            var sourceObj = new { value = 100 };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Should apply prepend first, then format
             Assert.NotNull(result["processedValue"]);
@@ -395,10 +385,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""name"": ""John""}";
+            var sourceObj = new { name = "John" };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Unknown converter is skipped, returns JsonElement
             var actualValue = result["processedName"];
@@ -421,10 +411,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""name"": ""John""}";
+            var sourceObj = new { name = "John" };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("John", result["simpleName"]);
@@ -444,10 +434,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""name"": ""John""}";
+            var sourceObj = new { name = "John" };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Empty conversion array returns JsonElement, not primitive
             var actualValue = result["simpleName"];
@@ -476,15 +466,17 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""person"": {
-                    ""first"": ""John"",
-                    ""last"": ""Doe""
+            var sourceObj = new
+            {
+                person = new
+                {
+                    first = "John",
+                    last = "Doe"
                 }
-            }";
+            };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Missing 'middle' field should be treated as empty string
             Assert.Equal("John  Doe", result["fullName"]);
@@ -513,15 +505,17 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""users"": [
-                    {""name"": ""John"", ""email"": ""john@test.com""},
-                    {""name"": ""Jane"", ""email"": ""jane@test.com""}
-                ]
-            }";
+            var sourceObj = new
+            {
+                users = new[]
+                {
+                    new { name = "John", email = "john@test.com" },
+                    new { name = "Jane", email = "jane@test.com" }
+                }
+            };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Should have processed users array
             Assert.True(result.ContainsKey("processedUsers"));
@@ -546,10 +540,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""text"": ""hello world""}";
+            var sourceObj = new { text = "hello world" };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert - Should return raw text when format fails
             Assert.Equal("\"hello world\"", result["formatted"]);
@@ -573,10 +567,10 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{""nullable"": null}";
+            var sourceObj = new { nullable = default(object) };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("prefix: ", result["processed"]);
@@ -601,19 +595,22 @@ namespace ConfigLink.Tests
                 }
             };
             var engine = new MappingEngine(mappingRules);
-            var sourceJson = @"{
-                ""data"": {
-                    ""first"": ""A"",
-                    ""second"": ""B"",
-                    ""third"": ""C""
+            var sourceObj = new
+            {
+                data = new
+                {
+                    first = "A",
+                    second = "B",
+                    third = "C"
                 }
-            }";
+            };
 
             // Act
-            var result = engine.Transform(sourceJson);
+            var result = engine.Transform(sourceObj);
 
             // Assert
             Assert.Equal("A | B", result["complexResult"]);
         }
     }
 }
+

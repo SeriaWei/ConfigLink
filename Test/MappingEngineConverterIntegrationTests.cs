@@ -26,12 +26,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""name"": ""hello world test""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { name = "hello world test" };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal("helloWorldTest", result["userName"]);
         }
@@ -53,12 +51,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""message"": ""  hello world  ""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { message = "  hello world  " };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal("hello world", result["cleanMessage"]);
         }
@@ -83,12 +79,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""text"": ""hello world""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { text = "hello world" };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal("hello universe", result["modifiedText"]);
         }
@@ -114,12 +108,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""fullText"": ""hello world""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { fullText = "hello world" };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal("hello", result["shortText"]);
         }
@@ -145,12 +137,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""nullValue"": null
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { nullValue = default(object) };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.True(result.ContainsKey("valueWithDefault"));
             Assert.NotNull(result["valueWithDefault"]);
@@ -174,12 +164,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""stringNumber"": ""123""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { stringNumber = "123" };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal(123, result["intNumber"]);
         }
@@ -201,12 +189,10 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""status"": ""yes""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { status = "yes" };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal(true, result["isActive"]);
         }
@@ -229,14 +215,13 @@ namespace ConfigLink.Tests
                 }
             };
 
-            var sourceJson = @"{
-                ""rawText"": ""  hello world test  ""
-            }";
-
             var engine = new MappingEngine(mappingRules);
-            var result = engine.Transform(sourceJson);
+            var sourceObj = new { rawText = "  hello world test  " };
+
+            var result = engine.Transform(sourceObj);
 
             Assert.Equal("HelloWorldTest", result["processedText"]);
         }
     }
 }
+

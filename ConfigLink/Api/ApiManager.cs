@@ -119,49 +119,9 @@ namespace ConfigLink
         /// <returns>映射后的数据</returns>
         private Dictionary<string, object?> ApplyMappings(object sourceData, List<MappingRule> mappings)
         {
-            var result = new Dictionary<string, object?>();
-            
-            // 将源数据转换为字典
-            Dictionary<string, object?> sourceDict;
-            if (sourceData is Dictionary<string, object?> dict)
-            {
-                sourceDict = dict;
-            }
-            else if (sourceData is string jsonString)
-            {
-                try
-                {
-                    sourceDict = JsonSerializer.Deserialize<Dictionary<string, object?>>(jsonString) ?? new Dictionary<string, object?>();
-                }
-                catch
-                {
-                    sourceDict = new Dictionary<string, object?>();
-                }
-            }
-            else
-            {
-                // 使用JSON序列化和反序列化来转换对象
-                try
-                {
-                    var json = JsonSerializer.Serialize(sourceData);
-                    sourceDict = JsonSerializer.Deserialize<Dictionary<string, object?>>(json) ?? new Dictionary<string, object?>();
-                }
-                catch
-                {
-                    sourceDict = new Dictionary<string, object?>();
-                }
-            }
-
-            // 应用映射规则
-            foreach (var mapping in mappings)
-            {
-                if (sourceDict.TryGetValue(mapping.Source, out var value))
-                {
-                    result[mapping.Target] = value;
-                }
-            }
-
-            return result;
+            // 使用 MappingEngine 进行转换
+            var mappingEngine = new MappingEngine(mappings);
+            return mappingEngine.Transform(sourceData);
         }
 
         private IHttpApiClient GetOrCreateClient(string platformName, ApiConfig config)
