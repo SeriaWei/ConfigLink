@@ -27,15 +27,17 @@ namespace ConfigLink.Api
                 {
                     if (_cache.TryGetValue(cacheKey, out cachedAuth) && !cachedAuth.IsExpired)
                     {
-                        ApplyAuthHeaders(httpClient, cachedAuth.TokenJson, config.Headers);
+                        // Parse cached token string to JsonDocument once for processing
+                        using var cachedTokenDoc = JsonDocument.Parse(cachedAuth.TokenJson);
+                        ApplyAuthHeaders(httpClient, cachedTokenDoc, config.Headers);
                         return true;
                     }
                 }
             }
 
             // Execute the authentication request to get token
-            var tokenJson = await ExecuteAuthRequestAsync(httpClient, config);
-            if (tokenJson == null)
+            using var tokenDoc = await ExecuteAuthRequestAsync(httpClient, config);
+            if (tokenDoc == null)
                 return false;
 
             if (config.CacheToken)
@@ -45,9 +47,7 @@ namespace ConfigLink.Api
                     // Try to extract expiration from response if available
                     DateTime expiresAt = DateTime.UtcNow.AddMinutes(30); // Default cache for 30 minutes
                     
-                    // Check if response has an expires_in field in the original response (under "response" key)
-                    using var tempDoc = JsonDocument.Parse(tokenJson);
-                    var rootElement = tempDoc.RootElement;
+                    var rootElement = tokenDoc.RootElement;
                     if (rootElement.TryGetProperty("response", out JsonElement responseElement))
                     {
                         if (responseElement.TryGetProperty("expires_in", out JsonElement expiresElement) && 
@@ -57,19 +57,20 @@ namespace ConfigLink.Api
                         }
                     }
 
+                    // Store the JSON string in the cache for persistence (like before)
                     _cache[cacheKey] = new AdvancedAuthCache
                     {
-                        TokenJson = tokenJson,
+                        TokenJson = tokenDoc.RootElement.ToString(), // Convert to JSON string representation
                         ExpiresAt = expiresAt
                     };
                 }
             }
 
-            ApplyAuthHeaders(httpClient, tokenJson, config.Headers);
+            ApplyAuthHeaders(httpClient, tokenDoc, config.Headers);
             return true;
         }
 
-        private async Task<string?> ExecuteAuthRequestAsync(HttpClient httpClient, ApiConfig config)
+        private async Task<JsonDocument?> ExecuteAuthRequestAsync(HttpClient httpClient, ApiConfig config)
         {
             try
             {
@@ -146,7 +147,7 @@ namespace ConfigLink.Api
                 
                 var jsonString = Encoding.UTF8.GetString(responseStream.ToArray());
                 
-                return jsonString;
+                return JsonDocument.Parse(jsonString);
             }
             catch (Exception)
             {
@@ -157,7 +158,7 @@ namespace ConfigLink.Api
 
 
 
-        private static void ApplyAuthHeaders(HttpClient httpClient, string tokenJson, Dictionary<string, string>? configHeaders)
+        private static void ApplyAuthHeaders(HttpClient httpClient, JsonDocument tokenDoc, Dictionary<string, string>? configHeaders)
         {
             // Clear any existing headers
             httpClient.DefaultRequestHeaders.Clear();
@@ -167,63 +168,66 @@ namespace ConfigLink.Api
             {
                 foreach (var header in configHeaders)
                 {
-                    var headerValue = ReplacePlaceholders(header.Value, tokenJson);
+                    var headerValue = ReplacePlaceholders(header.Value, tokenDoc);
                     httpClient.DefaultRequestHeaders.Add(header.Key, headerValue);
                 }
             }
         }
 
-        private static string ReplacePlaceholders(string template, string tokenJson)
+        private static string ReplacePlaceholders(string template, JsonDocument tokenDoc)
         {
             var result = template;
-            var regex = new System.Text.RegularExpressions.Regex(@"\{\{response\.([^}]+)\}\}");
+            // Updated regex to handle any JSON path, not just "response" and also handle whitespace in placeholders
+            var regex = new System.Text.RegularExpressions.Regex(@"\{\{\s*([^}]+?)\s*\}\}");
             var matches = regex.Matches(template);
 
             foreach (System.Text.RegularExpressions.Match match in matches)
             {
-                var fullMatch = match.Value; // e.g., {{response.auth.token}}
-                var path = match.Groups[1].Value; // e.g., auth.token
+                var fullMatch = match.Value; // e.g., {{ response.auth.token }} or {{ response.token }}
+                var path = match.Groups[1].Value.Trim(); // e.g., response.auth.token or response.token
 
-                var value = GetValueFromPath(tokenJson, path);
+                var value = GetNestedValue(tokenDoc.RootElement, path);
                 result = result.Replace(fullMatch, value ?? "");
             }
 
             return result;
         }
 
-        private static string? GetValueFromPath(string tokenJson, string path)
-        {
-            try
-            {
-                using var doc = JsonDocument.Parse(tokenJson);
-                var rootElement = doc.RootElement;
-                
-                // The root is structured as {"response": <original_response_data>}
-                // So we need to first access the "response" property and then access the path within that
-                if (!rootElement.TryGetProperty("response", out var responseElement))
-                    return null;
-
-                // Now extract the value using the path from the nested response data
-                return GetNestedValue(responseElement, path);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         private static string? GetNestedValue(JsonElement rootElement, string path)
         {
-            var parts = path.Split('.');
+            // Parse the path to handle both dot notation and bracket notation
+            var parts = ParsePath(path);
             JsonElement currentElement = rootElement;
 
             foreach (var part in parts)
             {
-                if (currentElement.ValueKind != JsonValueKind.Object)
+                if (currentElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (!currentElement.TryGetProperty(part, out currentElement))
+                        return null;
+                }
+                else if (currentElement.ValueKind == JsonValueKind.Array)
+                {
+                    // Check if the part is in bracket notation (e.g., "0" from "[0]")
+                    // or if it's a numeric string that represents an array index
+                    if (int.TryParse(part, out int index))
+                    {
+                        if (index < 0 || index >= currentElement.GetArrayLength())
+                            return null;
+                        
+                        currentElement = currentElement[index];
+                    }
+                    else
+                    {
+                        // If trying to access an array with a non-numeric key, return null
+                        return null;
+                    }
+                }
+                else
+                {
+                    // If the current element is neither an object nor array, return null
                     return null;
-
-                if (!currentElement.TryGetProperty(part, out currentElement))
-                    return null;
+                }
             }
 
             return currentElement.ValueKind switch
@@ -238,6 +242,63 @@ namespace ConfigLink.Api
                 JsonValueKind.Array => currentElement.GetArrayLength().ToString(),
                 _ => currentElement.ToString()
             };
+        }
+
+        private static List<string> ParsePath(string path)
+        {
+            var parts = new List<string>();
+            var currentPart = "";
+            
+            for (int i = 0; i < path.Length; i++)
+            {
+                char c = path[i];
+                
+                if (c == '[')
+                {
+                    // Add the current part before the bracket
+                    if (!string.IsNullOrEmpty(currentPart))
+                    {
+                        parts.Add(currentPart);
+                        currentPart = "";
+                    }
+                    
+                    // Find the closing bracket
+                    int closingBracketIndex = path.IndexOf(']', i);
+                    if (closingBracketIndex > i)
+                    {
+                        // Extract the array index/content inside brackets
+                        string bracketContent = path.Substring(i + 1, closingBracketIndex - i - 1);
+                        parts.Add(bracketContent);
+                        i = closingBracketIndex; // Skip to after the closing bracket
+                    }
+                    else
+                    {
+                        // If no closing bracket found, treat as part of the current part
+                        currentPart += c;
+                    }
+                }
+                else if (c == '.')
+                {
+                    // Add the current part and reset for the next
+                    if (!string.IsNullOrEmpty(currentPart))
+                    {
+                        parts.Add(currentPart);
+                        currentPart = "";
+                    }
+                }
+                else
+                {
+                    currentPart += c;
+                }
+            }
+            
+            // Add the last part if it exists
+            if (!string.IsNullOrEmpty(currentPart))
+            {
+                parts.Add(currentPart);
+            }
+            
+            return parts;
         }
 
 

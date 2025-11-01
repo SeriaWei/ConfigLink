@@ -129,27 +129,14 @@ namespace Test.Api
         [Fact]
         public void TestDataMappingForScenario()
         {
-            // 测试数据映射功能
-            var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
-            var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
             
-            var sourceData = new
-            {
-                email = "test@example.com",
-                firstName = "John",
-                lastName = "Doe"
-            };
-
-            // 这里我们无法直接测试ApplyMappings方法，因为它是私有的
-            // 但我们可以通过检查配置来验证映射规则是否正确加载
             var platformAConfig = scenarioConfigs.GetPlatformConfig("subscribe", "PlatformA");
             var platformBConfig = scenarioConfigs.GetPlatformConfig("subscribe", "PlatformB");
 
             Assert.NotNull(platformAConfig);
             Assert.NotNull(platformBConfig);
 
-            // 验证PlatformA的映射规�?
             var platformAMappings = platformAConfig.Mappings;
             Assert.Equal("email", platformAMappings[0].Source);
             Assert.Equal("emailAddress", platformAMappings[0].Target);
@@ -158,7 +145,6 @@ namespace Test.Api
             Assert.Equal("lastName", platformAMappings[2].Source);
             Assert.Equal("lastName", platformAMappings[2].Target);
 
-            // 验证PlatformB的映射规�?
             var platformBMappings = platformBConfig.Mappings;
             Assert.Equal("email", platformBMappings[0].Source);
             Assert.Equal("email", platformBMappings[0].Target);
