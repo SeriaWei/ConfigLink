@@ -7,7 +7,7 @@ using Xunit;
 namespace Test.Api
 {
     /// <summary>
-    /// API Manager的Mock测试，避免网络请�?
+    /// API Manager的Mock测试，避免网络请�?
     /// </summary>
     public class ApiManagerMockTests
     {
@@ -68,12 +68,12 @@ namespace Test.Api
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
 
-            // 创建Mock工厂和Mock客户�?
+            // 创建Mock工厂和Mock客户�?
             var mockFactory = new Mock<IHttpApiClientFactory>();
             var mockTestClient = new Mock<IHttpApiClient>();
             var mockEchoClient = new Mock<IHttpApiClient>();
 
-            // 设置Mock客户端的预期返回�?
+            // 设置Mock客户端的预期返回�?
             var testPlatformResult = new ApiResult
             {
                 Success = true,
@@ -98,7 +98,7 @@ namespace Test.Api
                 .Setup(c => c.SendAsync(It.IsAny<object>(), "/api/echo", "POST", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(echoPlatformResult);
 
-            // 设置工厂根据配置返回不同的Mock客户�?
+            // 设置工厂根据配置返回不同的Mock客户�?
             mockFactory
                 .Setup(f => f.CreateClient(It.Is<ApiConfig>(c => c.Endpoint == "https://api.test.com")))
                 .Returns(mockTestClient.Object);
@@ -158,7 +158,6 @@ namespace Test.Api
             var mockTestClient = new Mock<IHttpApiClient>();
             var mockEchoClient = new Mock<IHttpApiClient>();
 
-            // 设置一个失败的结果
             var failedResult = new ApiResult
             {
                 Success = false,
@@ -200,13 +199,13 @@ namespace Test.Api
             // Assert
             Assert.Equal(2, results.Count);
             
-            // 验证失败的结�?
+            // 验证失败的结�?
             var testResult = results["TestPlatform"];
             Assert.False(testResult.Success);
             Assert.Equal(500, testResult.StatusCode);
             Assert.Equal("Internal Server Error", testResult.ErrorMessage);
 
-            // 验证成功的结�?
+            // 验证成功的结�?
             var echoResult = results["EchoPlatform"];
             Assert.True(echoResult.Success);
             Assert.Equal(200, echoResult.StatusCode);
@@ -282,7 +281,7 @@ namespace Test.Api
         }
 
         /// <summary>
-        /// 验证映射后的数据是否包含指定的字段和�?
+        /// 验证映射后的数据是否包含指定的字段和�?
         /// </summary>
         private bool VerifyMappedData(object data, string expectedField, string expectedValue)
         {

@@ -1,6 +1,6 @@
 {
     "PlatformA": {
-        "endpoint": "https://api.a.com/v1/users",
+        "endpoint": "https://api.a.com/",
         "auth": "basic",
         "username": "admin",
         "password": "s3cr3t",
@@ -12,7 +12,7 @@
         "retry": 3
     },
     "PlatformB": {
-        "endpoint": "https://api.b.com/webhook",
+        "endpoint": "https://api.b.com/",
         "auth": "bearer",
         "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
         "headers": {
@@ -21,7 +21,7 @@
     },
 
     "PlatformC": {
-        "endpoint": "https://api.c.com/ingest",
+        "endpoint": "https://api.c.com/",
         "auth": "apikey",
         "apiKey": "sk-1234567890abcdef",
         "keyLocation": "header",
@@ -29,17 +29,35 @@
     },
 
     "PlatformD": {
-        "endpoint": "https://api.d.com/data",
+        "endpoint": "https://api.d.com/",
         "auth": "oauth2",
-        "tokenUrl": "https://oauth.d.com/token",
+        "tokenUrl": "/token",
         "clientId": "client_123",
         "clientSecret": "secret_456",
         "scope": "write:data",
         "cacheToken": true
     },
-
     "PlatformE": {
-        "endpoint": "https://api.e.com/echo",
+        "endpoint": "https://api.e.com/",
         "auth": "none"
+    },
+    "PlatformF": {
+        "endpoint": "https://api.f.com/",
+        "auth": "advanced",
+        "headers": {
+            "Authorization": "Bearer {{response.oauth_token}}"
+        },
+        "request": {
+            "url": "/login",
+            "method": "POST",
+            "headers": {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            },
+            "body": {
+                "username": "admin",
+                "password": "admin"
+            }
+        }
     }
 }

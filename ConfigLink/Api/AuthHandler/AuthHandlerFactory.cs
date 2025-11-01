@@ -17,6 +17,7 @@ namespace ConfigLink.Api
                 "bearer" => new BearerAuthHandler(),
                 "apikey" => new ApiKeyAuthHandler(),
                 "oauth2" => new OAuth2AuthHandler(),
+                "advanced" => new AdvancedAuthHandler(),
                 _ => new NoneAuthHandler()
             };
         }

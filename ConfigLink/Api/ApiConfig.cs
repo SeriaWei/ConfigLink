@@ -54,6 +54,25 @@ namespace ConfigLink.Api
 
         [JsonPropertyName("retry")]
         public int Retry { get; set; } = 0;
+
+        [JsonPropertyName("request")]
+        public AdvancedAuthRequest? Request { get; set; }
+
+    }
+
+    public class AdvancedAuthRequest
+    {
+        [JsonPropertyName("url")]
+        public string? Url { get; set; }
+
+        [JsonPropertyName("method")]
+        public string? Method { get; set; }
+
+        [JsonPropertyName("headers")]
+        public Dictionary<string, string>? Headers { get; set; }
+
+        [JsonPropertyName("body")]
+        public object? Body { get; set; }
     }
 
     /// <summary>
@@ -90,6 +109,7 @@ namespace ConfigLink.Api
         Basic,
         Bearer,
         ApiKey,
-        OAuth2
+        OAuth2,
+        Advanced
     }
 }
