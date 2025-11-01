@@ -68,7 +68,10 @@ namespace ConfigLink.Api
                 }
 
                 var content = new FormUrlEncodedContent(tokenRequest);
-                var response = await httpClient.PostAsync(config.TokenUrl, content);
+                
+                // Handle relative tokenUrl by combining with endpoint if needed
+                var tokenUrl = ResolveUrl(config.TokenUrl, config.Endpoint);
+                var response = await httpClient.PostAsync(tokenUrl, content);
 
                 if (!response.IsSuccessStatusCode)
                     return null;
@@ -103,6 +106,24 @@ namespace ConfigLink.Api
             public string AccessToken { get; set; } = string.Empty;
             public DateTime ExpiresAt { get; set; }
             public bool IsExpired => DateTime.UtcNow >= ExpiresAt.AddMinutes(-5); // 提前5分钟刷新
+        }
+
+        private static string ResolveUrl(string? tokenUrl, string? endpoint)
+        {
+            if (string.IsNullOrEmpty(tokenUrl))
+                return string.Empty;
+
+            if (Uri.TryCreate(tokenUrl, UriKind.Absolute, out _))
+                return tokenUrl;
+
+            if (!string.IsNullOrEmpty(endpoint))
+            {
+                var baseUri = new Uri(endpoint);
+                var combinedUri = new Uri(baseUri, tokenUrl);
+                return combinedUri.ToString();
+            }
+
+            return tokenUrl;
         }
     }
 }
