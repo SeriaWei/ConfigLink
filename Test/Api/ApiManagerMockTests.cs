@@ -6,9 +6,6 @@ using Xunit;
 
 namespace Test.Api
 {
-    /// <summary>
-    /// API Manager的Mock测试，避免网络请�?
-    /// </summary>
     public class ApiManagerMockTests
     {
         private const string ApiConfigJson = @"{
@@ -64,16 +61,13 @@ namespace Test.Api
         [Fact]
         public async Task ApiManager_ShouldSendToScenario_WithMock()
         {
-            // Arrange
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
 
-            // 创建Mock工厂和Mock客户�?
             var mockFactory = new Mock<IHttpApiClientFactory>();
             var mockTestClient = new Mock<IHttpApiClient>();
             var mockEchoClient = new Mock<IHttpApiClient>();
 
-            // 设置Mock客户端的预期返回�?
             var testPlatformResult = new ApiResult
             {
                 Success = true,
@@ -98,7 +92,6 @@ namespace Test.Api
                 .Setup(c => c.SendAsync(It.IsAny<object>(), "/api/echo", "POST", It.IsAny<CancellationToken>()))
                 .ReturnsAsync(echoPlatformResult);
 
-            // 设置工厂根据配置返回不同的Mock客户�?
             mockFactory
                 .Setup(f => f.CreateClient(It.Is<ApiConfig>(c => c.Endpoint == "https://api.test.com")))
                 .Returns(mockTestClient.Object);
@@ -114,10 +107,8 @@ namespace Test.Api
                 email = "john@example.com"
             };
 
-            // Act
             var results = await apiManager.SendAsync("test", testData);
 
-            // Assert
             Assert.Equal(2, results.Count);
             Assert.Contains("TestPlatform", results.Keys);
             Assert.Contains("EchoPlatform", results.Keys);
@@ -133,7 +124,6 @@ namespace Test.Api
             Assert.Equal(200, echoResult.StatusCode);
             Assert.Contains("echo", echoResult.ResponseContent);
 
-            // 验证Mock调用
             mockTestClient.Verify(c => c.SendAsync(
                 It.Is<object>(data => VerifyMappedData(data, "userName", "John Doe")), 
                 "/api/test", 
@@ -150,7 +140,6 @@ namespace Test.Api
         [Fact]
         public async Task ApiManager_ShouldHandleFailure_WithMock()
         {
-            // Arrange
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
 
@@ -193,19 +182,15 @@ namespace Test.Api
             var apiManager = new ApiManager(apiConfigs, scenarioConfigs, mockFactory.Object);
             var testData = new { name = "Test User", email = "test@example.com" };
 
-            // Act
             var results = await apiManager.SendAsync("test", testData);
 
-            // Assert
             Assert.Equal(2, results.Count);
             
-            // 验证失败的结�?
             var testResult = results["TestPlatform"];
             Assert.False(testResult.Success);
             Assert.Equal(500, testResult.StatusCode);
             Assert.Equal("Internal Server Error", testResult.ErrorMessage);
 
-            // 验证成功的结�?
             var echoResult = results["EchoPlatform"];
             Assert.True(echoResult.Success);
             Assert.Equal(200, echoResult.StatusCode);
@@ -214,7 +199,6 @@ namespace Test.Api
         [Fact]
         public async Task ApiManager_ShouldApplyDataMappings_WithMock()
         {
-            // Arrange
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
 
@@ -244,10 +228,8 @@ namespace Test.Api
                 email = "jane.smith@example.com"
             };
 
-            // Act
             await apiManager.SendAsync("test", testData);
 
-            // Assert - 验证数据映射是否正确应用
             mockClient.Verify(c => c.SendAsync(
                 It.Is<object>(data => 
                     VerifyMappedData(data, "userName", "Jane Smith") || 
@@ -268,21 +250,16 @@ namespace Test.Api
         [Fact]
         public void ApiManager_ShouldThrowForInvalidScenario_WithMock()
         {
-            // Arrange
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
             var mockFactory = new Mock<IHttpApiClientFactory>();
 
             var apiManager = new ApiManager(apiConfigs, scenarioConfigs, mockFactory.Object);
 
-            // Act & Assert
             var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await apiManager.SendAsync("nonexistent", new { }));
         }
 
-        /// <summary>
-        /// 验证映射后的数据是否包含指定的字段和�?
-        /// </summary>
         private bool VerifyMappedData(object data, string expectedField, string expectedValue)
         {
             if (data is Dictionary<string, object> dict)
@@ -291,7 +268,6 @@ namespace Test.Api
                        dict[expectedField]?.ToString() == expectedValue;
             }
 
-            // 如果是其他类型，尝试使用反射
             var prop = data.GetType().GetProperty(expectedField);
             if (prop != null)
             {
