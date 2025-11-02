@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using Xunit;
 
-namespace ConfigLink.Tests
+namespace ConfigLink.Tests.MappingEngineTests
 {
     public class MappingEngine_ConversionTests
     {

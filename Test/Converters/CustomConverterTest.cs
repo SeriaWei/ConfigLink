@@ -4,7 +4,7 @@ using System.Text.Json;
 using ConfigLink.Converters;
 using Xunit;
 
-namespace ConfigLink.Tests
+namespace ConfigLink.Tests.Converters
 {
     public class CustomConverterTest
     {
