@@ -15,20 +15,15 @@ namespace ConfigLink.Converters
             if (text == null)
                 return null;
 
-            // 支持两种参数格式：
-            // 1. 简化格式：直接是字符串值 "both" - 只指定 type
-            // 2. 完整格式：对象 {"type": "both", "chars": "."}
             string trimType = "both";
             string? trimChars = null;
             
             if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                // 简化格式：直接是字符串值，表示 type
                 trimType = conversionParams.GetString()?.ToLowerInvariant() ?? "both";
             }
             else if (conversionParams.ValueKind == JsonValueKind.Object)
             {
-                // 完整格式：嵌套对象
                 if (conversionParams.TryGetProperty("type", out var typeProperty))
                 {
                     trimType = typeProperty.GetString()?.ToLowerInvariant() ?? "both";

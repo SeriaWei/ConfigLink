@@ -12,21 +12,16 @@ namespace ConfigLink.Converters
     {
         public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            // 支持两种参数格式：
-            // 1. 简化格式：直接是字符串值 "int" - 只指定 type
-            // 2. 完整格式：对象 {"type": "int", "format": "N2"}
             string outputType = "decimal";
             string? format = null;
             string culture = "invariant";
             
             if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                // 简化格式：直接是字符串值，表示 type
                 outputType = conversionParams.GetString()?.ToLowerInvariant() ?? "decimal";
             }
             else if (conversionParams.ValueKind == JsonValueKind.Object)
             {
-                // 完整格式：嵌套对象
                 if (conversionParams.TryGetProperty("type", out var typeProperty))
                 {
                     outputType = typeProperty.GetString()?.ToLowerInvariant() ?? "decimal";
@@ -48,7 +43,6 @@ namespace ConfigLink.Converters
                 _ => CultureInfo.GetCultureInfo(culture)
             };
 
-            // 首先尝试获取数值
             decimal numericValue = 0;
             bool hasValue = false;
 
@@ -70,7 +64,6 @@ namespace ConfigLink.Converters
             if (!hasValue)
                 return null;
 
-            // 根据输出类型转换
             object result = outputType switch
             {
                 "int" or "integer" => (int)numericValue,
@@ -81,7 +74,6 @@ namespace ConfigLink.Converters
                 _ => numericValue
             };
 
-            // 如果指定了格式，返回格式化字符串
             if (!string.IsNullOrEmpty(format))
             {
                 return result switch

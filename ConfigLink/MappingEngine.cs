@@ -17,7 +17,6 @@ namespace ConfigLink
         {
             _rules = rules;
 
-            // 注册所有 converter
             _converters = new()
             {
                 ["format"] = new FormatConverter(),
@@ -36,11 +35,6 @@ namespace ConfigLink
             };
         }
 
-        /// <summary>
-        /// 注册自定义转换器
-        /// </summary>
-        /// <param name="name">转换器名称</param>
-        /// <param name="converter">转换器实例</param>
         public void RegisterConverter(string name, IConverter converter)
         {
             if (string.IsNullOrWhiteSpace(name))
@@ -52,9 +46,6 @@ namespace ConfigLink
             _converters[name] = converter;
         }
 
-        /// <summary>
-        /// 入口：把源对象转换成目标字典
-        /// </summary>
         public Dictionary<string, object?> Transform(object sourceObj)
         {
             JsonElement root=JsonSerializer.SerializeToElement(sourceObj);
@@ -69,14 +60,13 @@ namespace ConfigLink
             {
                 var value = GetValueByPath(element, rule.Source);
 
-                if (value == null) continue; // 路径不存在直接跳过
+                if (value == null) continue; 
 
                 var converted = ApplyConversions(value.Value, rule, this);
                 var target = rule.Target;
 
                 if (target == "$root")
                 {
-                    // 展开到根
                     if (converted is Dictionary<string, object?> dict)
                     {
                         foreach (var kv in dict)
@@ -99,14 +89,14 @@ namespace ConfigLink
             foreach (var part in parts)
             {
                 var cleaned = part.TrimEnd(']');
-                if (cleaned.All(char.IsDigit)) // 数组索引
+                if (cleaned.All(char.IsDigit))
                 {
                     var idx = int.Parse(cleaned);
                     if (current.ValueKind != JsonValueKind.Array || idx >= current.GetArrayLength())
                         return null;
                     current = current[idx];
                 }
-                else // 对象属性
+                else 
                 {
                     if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(cleaned, out current))
                         return null;
@@ -117,23 +107,21 @@ namespace ConfigLink
 
         private object? ApplyConversions(JsonElement value, MappingRule rule, MappingEngine engine)
         {
-            object? cur = value.Clone(); // 保持原始 JsonElement
+            object? cur = value.Clone();
 
             if (rule.Conversion == null) return ConvertToPrimitive(cur);
 
             foreach (var op in rule.Conversion)
             {
                 if (!_converters.TryGetValue(op, out var converter))
-                    continue; // 未知操作直接跳过
+                    continue;
 
-                // 需要将当前值转换为 JsonElement 传递给转换器
                 JsonElement currentElement = cur switch
                 {
                     JsonElement je => je,
                     _ => JsonSerializer.SerializeToElement(cur)
                 };
 
-                // 根据转换器名称从 ConversionParams 中提取对应的参数
                 JsonElement conversionParams = default;
                 if (rule.ConversionParams?.TryGetValue(op, out var paramObj) == true)
                 {

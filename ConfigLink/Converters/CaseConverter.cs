@@ -17,18 +17,13 @@ namespace ConfigLink.Converters
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            // 支持两种参数格式：
-            // 1. 简化格式：直接是字符串值 "upper"
-            // 2. 完整格式：对象 {"case": "upper"}
             string caseType = "lower";
             if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                // 简化格式：直接是字符串值
                 caseType = conversionParams.GetString()?.ToLowerInvariant() ?? "lower";
             }
             else if (conversionParams.ValueKind == JsonValueKind.Object && conversionParams.TryGetProperty("case", out var caseProperty))
             {
-                // 完整格式：嵌套对象
                 caseType = caseProperty.GetString()?.ToLowerInvariant() ?? "lower";
             }
 
@@ -50,7 +45,6 @@ namespace ConfigLink.Converters
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            // 分割单词（按空格、下划线、连字符等）
             var words = Regex.Split(text, @"[\s_-]+", RegexOptions.IgnoreCase)
                             .Where(w => !string.IsNullOrEmpty(w))
                             .ToArray();
@@ -96,10 +90,8 @@ namespace ConfigLink.Converters
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            // 处理 PascalCase/camelCase
             text = Regex.Replace(text, @"([a-z])([A-Z])", "$1-$2");
             
-            // 替换空格和下划线为连字符
             text = Regex.Replace(text, @"[\s_]+", "-");
             
             return text.ToLowerInvariant();
@@ -110,10 +102,8 @@ namespace ConfigLink.Converters
             if (string.IsNullOrEmpty(text))
                 return text;
 
-            // 处理 PascalCase/camelCase
             text = Regex.Replace(text, @"([a-z])([A-Z])", "$1_$2");
             
-            // 替换空格和连字符为下划线
             text = Regex.Replace(text, @"[\s-]+", "_");
             
             return text.ToLowerInvariant();

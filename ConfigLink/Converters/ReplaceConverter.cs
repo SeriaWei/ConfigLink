@@ -16,7 +16,6 @@ namespace ConfigLink.Converters
             if (text == null)
                 return null;
 
-            // 从传入的 conversionParams 中获取参数
             string? search = null;
             string replace = "";
             bool useRegex = false;
@@ -75,7 +74,6 @@ namespace ConfigLink.Converters
                 }
                 catch (ArgumentException)
                 {
-                    // 如果正则表达式无效，回退到普通字符串替换
                     return ReplaceString(text, search, replace, ignoreCase);
                 }
             }

@@ -11,22 +11,16 @@ namespace ConfigLink.Converters
     {
         public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            // 从传入的 conversionParams 中获取参数
-            // 支持两种参数格式：
-            // 1. 简化格式：直接是字符串值 "yesno" - 只指定 output 格式
-            // 2. 完整格式：对象 {"output": "yesno", "trueValues": "yes,1"}
             string? trueValuesParam = null;
             string? falseValuesParam = null;
             string outputFormat = "boolean";
             
             if (conversionParams.ValueKind == JsonValueKind.String)
             {
-                // 简化格式：直接是字符串值，表示 output 格式
                 outputFormat = conversionParams.GetString()?.ToLowerInvariant() ?? "boolean";
             }
             else if (conversionParams.ValueKind == JsonValueKind.Object)
             {
-                // 完整格式：嵌套对象
                 if (conversionParams.TryGetProperty("trueValues", out var trueValuesProperty))
                 {
                     trueValuesParam = trueValuesProperty.GetString();

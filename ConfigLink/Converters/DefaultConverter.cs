@@ -11,7 +11,6 @@ namespace ConfigLink.Converters
     {
         public object? Convert(JsonElement value, JsonElement conversionParams, MappingEngine engine)
         {
-            // 从传入的 conversionParams 中获取参数
             object? defaultValueObj = null;
             string condition = "null";
 
@@ -30,7 +29,6 @@ namespace ConfigLink.Converters
                 }
             }
 
-            // 检查是否应该使用默认值
             bool useDefault = condition switch
             {
                 "null" => value.ValueKind == JsonValueKind.Null,
@@ -46,7 +44,6 @@ namespace ConfigLink.Converters
                 return defaultValueObj;
             }
 
-            // 返回原始值
             return value.ValueKind switch
             {
                 JsonValueKind.String => value.GetString(),
