@@ -6,9 +6,6 @@ using System.Web;
 
 namespace ConfigLink.Api
 {
-    /// <summary>
-    /// HTTP API客户端，支持多种认证方式、重试和超时
-    /// </summary>
     public class HttpApiClient : IHttpApiClient
     {
         private readonly HttpClient _httpClient;
@@ -30,17 +27,13 @@ namespace ConfigLink.Api
 
             foreach (var header in _config.Headers)
             {
-                // 跳过 Content-Type 等内容头部，这些会在 CreateContent 中处理
                 if (IsContentHeader(header.Key))
                     continue;
 
-                // 处理特殊占位符
                 var value = ProcessPlaceholders(header.Value);
-                
-                // 移除现有的头部（如果存在）
+
                 _httpClient.DefaultRequestHeaders.Remove(header.Key);
-                
-                // 添加新的头部
+
                 _httpClient.DefaultRequestHeaders.Add(header.Key, value);
             }
         }
@@ -55,34 +48,12 @@ namespace ConfigLink.Api
 
         private string ProcessPlaceholders(string value)
         {
-            // 处理 {{guid}} 占位符
             if (value.Contains("{{guid}}"))
             {
                 value = value.Replace("{{guid}}", Guid.NewGuid().ToString());
             }
 
-            // 可以添加更多占位符处理
             return value;
-        }
-
-        private string ProcessDataPlaceholders(string template, object data)
-        {
-            // 处理形如 {PropertyName} 的占位符
-            if (!template.Contains('{')) return template;
-
-            var result = template;
-            var dataDict = ConvertToStringDictionary(data);
-
-            foreach (var kvp in dataDict)
-            {
-                var placeholder = $"{{{kvp.Key}}}";
-                if (result.Contains(placeholder))
-                {
-                    result = result.Replace(placeholder, kvp.Value ?? string.Empty);
-                }
-            }
-
-            return result;
         }
 
         private Dictionary<string, string?> ConvertToStringDictionary(object data)
@@ -98,7 +69,6 @@ namespace ConfigLink.Api
             }
             else
             {
-                // 使用反射获取属性
                 var properties = data.GetType().GetProperties();
                 foreach (var prop in properties)
                 {
@@ -130,8 +100,7 @@ namespace ConfigLink.Api
             }
 
             var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
-            
-            // 设置其他内容头部
+
             if (_config.Headers != null)
             {
                 foreach (var header in _config.Headers)
@@ -139,7 +108,7 @@ namespace ConfigLink.Api
                     if (IsContentHeader(header.Key))
                     {
                         var value = ProcessPlaceholders(header.Value);
-                        
+
                         if (header.Key.Equals("Content-Type", StringComparison.OrdinalIgnoreCase))
                         {
                             content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(value);
@@ -156,14 +125,6 @@ namespace ConfigLink.Api
             return content;
         }
 
-        /// <summary>
-        /// 发送数据到指定路径的API端点
-        /// </summary>
-        /// <param name="data">要发送的数据</param>
-        /// <param name="path">API路径</param>
-        /// <param name="method">HTTP方法，默认为POST</param>
-        /// <param name="cancellationToken">取消令牌</param>
-        /// <returns>API调用结果</returns>
         public async Task<ApiResult> SendAsync(object data, string path, string method = "POST", CancellationToken cancellationToken = default)
         {
             var stopwatch = Stopwatch.StartNew();
@@ -174,7 +135,8 @@ namespace ConfigLink.Api
             {
                 try
                 {
-                    // 配置认证
+                    ConfigureHeaders();
+
                     var authConfigured = await _authHandler.ConfigureAuthAsync(_httpClient, _config);
                     if (!authConfigured)
                     {
@@ -186,23 +148,19 @@ namespace ConfigLink.Api
                         };
                     }
 
-                    // 配置头部
-                    ConfigureHeaders();
-
-                    // 构建完整URI（基础端点 + 指定路径）
                     var uri = BuildUriWithPath(data, path);
 
-                    // 发送请求
                     var httpMethodUpper = method.ToUpper();
-                    HttpResponseMessage? response = httpMethodUpper switch
+
+                    using HttpResponseMessage? response = httpMethodUpper switch
                     {
                         "GET" => await _httpClient.GetAsync(uri, cancellationToken),
                         "POST" => await _httpClient.PostAsync(uri, CreateContent(data), cancellationToken),
                         "PUT" => await _httpClient.PutAsync(uri, CreateContent(data), cancellationToken),
                         "DELETE" => await _httpClient.DeleteAsync(uri, cancellationToken),
-                        "PATCH" => await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Patch, uri) 
-                        { 
-                            Content = CreateContent(data) 
+                        "PATCH" => await _httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Patch, uri)
+                        {
+                            Content = CreateContent(data)
                         }, cancellationToken),
                         _ => throw new NotSupportedException($"HTTP method {method} is not supported")
                     };
@@ -223,7 +181,7 @@ namespace ConfigLink.Api
                     lastException = ex;
                     if (attempt < maxRetries)
                     {
-                        await Task.Delay(1000 * (attempt + 1), cancellationToken); // 指数退避
+                        await Task.Delay(1000 * (attempt + 1), cancellationToken);
                         continue;
                     }
 
@@ -269,10 +227,6 @@ namespace ConfigLink.Api
                         Duration = stopwatch.Elapsed
                     };
                 }
-                finally
-                {
-                    // 这里不需要dispose response，因为HttpClient会处理
-                }
             }
 
             return new ApiResult
@@ -286,10 +240,8 @@ namespace ConfigLink.Api
 
         private string BuildUriWithPath(object data, string path)
         {
-            // 获取基础端点URL
             var baseUri = _config.Endpoint.TrimEnd('/');
-            
-            // 组合路径
+
             var fullPath = path.StartsWith('/') ? path : '/' + path;
             var uri = baseUri + fullPath;
 

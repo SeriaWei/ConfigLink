@@ -26,7 +26,7 @@ namespace Test.Api.AdvancedAuth
             // Arrange
             var authHandler = new AdvancedAuthHandler();
             var jsonResponse = JsonSerializer.Serialize(new { oauth_token = "test-token-value" });
-            
+
             _httpHandlerStub.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
                 Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json")
@@ -68,7 +68,7 @@ namespace Test.Api.AdvancedAuth
             // Arrange
             var authHandler = new AdvancedAuthHandler();
             var jsonResponse = JsonSerializer.Serialize(new { auth = new { token = "nested-token-value" } });
-            
+
             _httpHandlerStub.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
                 Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json")
@@ -109,7 +109,7 @@ namespace Test.Api.AdvancedAuth
         {
             // Arrange
             var authHandler = new AdvancedAuthHandler();
-            
+
             _httpHandlerStub.Response = new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
 
             var config = new ApiConfig
@@ -169,7 +169,7 @@ namespace Test.Api.AdvancedAuth
             // Arrange
             var authHandler = new AdvancedAuthHandler();
             var jsonResponse = JsonSerializer.Serialize(new { access_token = "relative-url-token" });
-            
+
             _httpHandlerStub.Response = new HttpResponseMessage(System.Net.HttpStatusCode.OK)
             {
                 Content = new StringContent(jsonResponse, Encoding.UTF8, "application/json")
@@ -203,7 +203,7 @@ namespace Test.Api.AdvancedAuth
             Assert.True(_httpClient.DefaultRequestHeaders.Contains("X-API-Key"));
             var apiKeyHeader = _httpClient.DefaultRequestHeaders.GetValues("X-API-Key").First();
             Assert.Equal("relative-url-token", apiKeyHeader);
-            
+
             // Verify the request was made to the correct resolved URL
             Assert.True(_httpHandlerStub.RequestUri?.ToString().EndsWith("/token"));
         }
