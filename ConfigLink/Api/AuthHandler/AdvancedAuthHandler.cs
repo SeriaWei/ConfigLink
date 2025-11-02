@@ -1,6 +1,7 @@
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using ConfigLink.Extensions;
 
 namespace ConfigLink.Api
 {
@@ -186,120 +187,14 @@ namespace ConfigLink.Api
                 var fullMatch = match.Value; // e.g., {{ response.auth.token }} or {{ response.token }}
                 var path = match.Groups[1].Value.Trim(); // e.g., response.auth.token or response.token
 
-                var value = GetNestedValue(tokenDoc.RootElement, path);
+                var value = tokenDoc.RootElement.GetValueByPath(path);
                 result = result.Replace(fullMatch, value ?? "");
             }
 
             return result;
         }
 
-        private static string? GetNestedValue(JsonElement rootElement, string path)
-        {
-            // Parse the path to handle both dot notation and bracket notation
-            var parts = ParsePath(path);
-            JsonElement currentElement = rootElement;
 
-            foreach (var part in parts)
-            {
-                if (currentElement.ValueKind == JsonValueKind.Object)
-                {
-                    if (!currentElement.TryGetProperty(part, out currentElement))
-                        return null;
-                }
-                else if (currentElement.ValueKind == JsonValueKind.Array)
-                {
-                    // Check if the part is in bracket notation (e.g., "0" from "[0]")
-                    // or if it's a numeric string that represents an array index
-                    if (int.TryParse(part, out int index))
-                    {
-                        if (index < 0 || index >= currentElement.GetArrayLength())
-                            return null;
-                        
-                        currentElement = currentElement[index];
-                    }
-                    else
-                    {
-                        // If trying to access an array with a non-numeric key, return null
-                        return null;
-                    }
-                }
-                else
-                {
-                    // If the current element is neither an object nor array, return null
-                    return null;
-                }
-            }
-
-            return currentElement.ValueKind switch
-            {
-                JsonValueKind.String => currentElement.GetString(),
-                JsonValueKind.Number => currentElement.TryGetInt64(out long l) ? l.ToString() : 
-                                        currentElement.TryGetDouble(out double d) ? d.ToString() : 
-                                        currentElement.GetDouble().ToString(),
-                JsonValueKind.True => true.ToString(),
-                JsonValueKind.False => false.ToString(),
-                JsonValueKind.Null => null,
-                JsonValueKind.Array => currentElement.GetArrayLength().ToString(),
-                _ => currentElement.ToString()
-            };
-        }
-
-        private static List<string> ParsePath(string path)
-        {
-            var parts = new List<string>();
-            var currentPart = "";
-            
-            for (int i = 0; i < path.Length; i++)
-            {
-                char c = path[i];
-                
-                if (c == '[')
-                {
-                    // Add the current part before the bracket
-                    if (!string.IsNullOrEmpty(currentPart))
-                    {
-                        parts.Add(currentPart);
-                        currentPart = "";
-                    }
-                    
-                    // Find the closing bracket
-                    int closingBracketIndex = path.IndexOf(']', i);
-                    if (closingBracketIndex > i)
-                    {
-                        // Extract the array index/content inside brackets
-                        string bracketContent = path.Substring(i + 1, closingBracketIndex - i - 1);
-                        parts.Add(bracketContent);
-                        i = closingBracketIndex; // Skip to after the closing bracket
-                    }
-                    else
-                    {
-                        // If no closing bracket found, treat as part of the current part
-                        currentPart += c;
-                    }
-                }
-                else if (c == '.')
-                {
-                    // Add the current part and reset for the next
-                    if (!string.IsNullOrEmpty(currentPart))
-                    {
-                        parts.Add(currentPart);
-                        currentPart = "";
-                    }
-                }
-                else
-                {
-                    currentPart += c;
-                }
-            }
-            
-            // Add the last part if it exists
-            if (!string.IsNullOrEmpty(currentPart))
-            {
-                parts.Add(currentPart);
-            }
-            
-            return parts;
-        }
 
 
 

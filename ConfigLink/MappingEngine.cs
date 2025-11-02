@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ConfigLink.Converters;
 using System.Text.Json;
+using ConfigLink.Extensions;
 
 namespace ConfigLink
 {
@@ -83,26 +84,7 @@ namespace ConfigLink
 
         internal JsonElement? GetValueByPath(JsonElement root, string path)
         {
-            var parts = path.Split(new[] { '.', '[' }, StringSplitOptions.RemoveEmptyEntries);
-            JsonElement current = root;
-
-            foreach (var part in parts)
-            {
-                var cleaned = part.TrimEnd(']');
-                if (cleaned.All(char.IsDigit))
-                {
-                    var idx = int.Parse(cleaned);
-                    if (current.ValueKind != JsonValueKind.Array || idx >= current.GetArrayLength())
-                        return null;
-                    current = current[idx];
-                }
-                else 
-                {
-                    if (current.ValueKind != JsonValueKind.Object || !current.TryGetProperty(cleaned, out current))
-                        return null;
-                }
-            }
-            return current;
+            return root.GetByPath(path);
         }
 
         private object? ApplyConversions(JsonElement value, MappingRule rule, MappingEngine engine)
