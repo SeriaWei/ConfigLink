@@ -17,14 +17,12 @@ namespace Test.Api
             
             if (Response != null)
             {
-                // Return the original response, ensuring content is available and content type is preserved
                 var originalContent = await Response.Content.ReadAsStringAsync();
                 var clonedResponse = new HttpResponseMessage(Response.StatusCode)
                 {
                     Content = new StringContent(originalContent, Encoding.UTF8, "application/json")
                 };
                 
-                // Copy headers if needed
                 foreach (var header in Response.Headers)
                 {
                     clonedResponse.Headers.Add(header.Key, header.Value);
@@ -33,7 +31,6 @@ namespace Test.Api
                 return clonedResponse;
             }
             
-            // Fallback response with proper JSON content type
             return new HttpResponseMessage
             {
                 StatusCode = System.Net.HttpStatusCode.OK,

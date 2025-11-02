@@ -1,4 +1,4 @@
-/*
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,17 +27,10 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapArrayConverter();
             var value = JsonSerializer.SerializeToElement(new { not = "array" });
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "map_array" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["map_array"] = new object[0]
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(new object[0]);
             var engine = CreateTestEngine();
 
-            var result = converter.Convert(value, rule, engine);
+            var result = converter.Convert(value, conversionParams, engine);
 
             Assert.Null(result);
         }
@@ -57,17 +50,10 @@ namespace ConfigLink.Tests.Converters
                 new { source = "name", target = "userName" }
             };
             
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "map_array" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["map_array"] = subRules
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(subRules);
             var engine = CreateTestEngine();
 
-            var result = converter.Convert(value, rule, engine);
+            var result = converter.Convert(value, conversionParams, engine);
 
             Assert.NotNull(result);
             Assert.IsType<List<Dictionary<string, object?>>>(result);
@@ -91,17 +77,11 @@ namespace ConfigLink.Tests.Converters
         {
             var converter = new MapArrayConverter();
             var value = JsonSerializer.SerializeToElement(new object[0]);
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "map_array" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["map_array"] = new[] { new { source = "test", target = "test" } }
-                }
-            };
+            var subRules = new[] { new { source = "test", target = "test" } };
+            var conversionParams = JsonSerializer.SerializeToElement(subRules);
             var engine = CreateTestEngine();
 
-            var result = converter.Convert(value, rule, engine);
+            var result = converter.Convert(value, conversionParams, engine);
 
             Assert.NotNull(result);
             Assert.IsType<List<Dictionary<string, object?>>>(result);
@@ -133,17 +113,10 @@ namespace ConfigLink.Tests.Converters
                 new { source = "inStock", target = "available" }
             };
             
-            var rule = new MappingRule
-            {
-                Conversion = new List<string> { "map_array" },
-                ConversionParams = new Dictionary<string, object>
-                {
-                    ["map_array"] = subRules
-                }
-            };
+            var conversionParams = JsonSerializer.SerializeToElement(subRules);
             var engine = CreateTestEngine();
 
-            var result = converter.Convert(value, rule, engine);
+            var result = converter.Convert(value, conversionParams, engine);
 
             Assert.NotNull(result);
             var list = (List<Dictionary<string, object?>>)result!;
@@ -157,4 +130,3 @@ namespace ConfigLink.Tests.Converters
         }
     }
 }
-*/

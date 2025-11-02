@@ -63,7 +63,6 @@ namespace Test.Api
         [Fact]
         public void TestScenarioConfigLoading()
         {
-            // 测试场景配置加载
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
             
             Assert.NotNull(scenarioConfigs);
@@ -74,13 +73,11 @@ namespace Test.Api
             Assert.True(subscribeScenario.ContainsKey("PlatformA"));
             Assert.True(subscribeScenario.ContainsKey("PlatformB"));
 
-            // 测试PlatformA配置
             var platformA = subscribeScenario["PlatformA"];
             Assert.Equal("/api/v1/subscribe", platformA.Path);
             Assert.Equal("POST", platformA.Method);
             Assert.Equal(3, platformA.Mappings.Count);
 
-            // 测试PlatformB配置
             var platformB = subscribeScenario["PlatformB"];
             Assert.Equal("/v2/newsletter/subscribe", platformB.Path);
             Assert.Equal("PUT", platformB.Method);
@@ -90,17 +87,14 @@ namespace Test.Api
         [Fact]
         public void TestApiManagerWithScenario()
         {
-            // 测试ApiManager支持场景配置
             var apiConfigs = ApiConfigs.LoadFromJson(ApiConfigJson);
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
             var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
             
-            // 测试获取场景信息
             var scenarios = apiManager.GetAvailableScenarios().ToList();
             Assert.Single(scenarios);
             Assert.Equal("subscribe", scenarios[0]);
 
-            // 测试获取场景中的平台
             var platforms = apiManager.GetAvailablePlatforms("subscribe").ToList();
             Assert.Equal(2, platforms.Count);
             Assert.Contains("PlatformA", platforms);
@@ -114,12 +108,10 @@ namespace Test.Api
             var scenarioConfigs = ScenarioConfigs.LoadFromJson(ScenarioConfigJson);
             var apiManager = new ApiManager(apiConfigs, scenarioConfigs);
             
-            // 测试获取场景信息
             var scenarios = apiManager.GetAvailableScenarios().ToList();
             Assert.Single(scenarios);
             Assert.Equal("subscribe", scenarios[0]);
 
-            // 测试获取场景中的平台
             var platforms = apiManager.GetAvailablePlatforms("subscribe").ToList();
             Assert.Equal(2, platforms.Count);
             Assert.Contains("PlatformA", platforms);
