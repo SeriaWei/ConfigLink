@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using ConfigLink.Api;
 
-namespace Test.Api.AdvancedAuth
+namespace ConfigLink.Api.Tests.AdvancedAuth
 {
     public class TokenCachingTests : IDisposable
     {

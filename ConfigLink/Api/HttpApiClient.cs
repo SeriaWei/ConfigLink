@@ -13,10 +13,15 @@ namespace ConfigLink.Api
         private readonly IAuthHandler _authHandler;
         private bool _disposed = false;
 
-        public HttpApiClient(ApiConfig config)
+        public HttpApiClient(ApiConfig config) : this(config, new HttpClient())
+        {
+
+        }
+
+        public HttpApiClient(ApiConfig config, HttpClient httpClient)
         {
             _config = config ?? throw new ArgumentNullException(nameof(config));
-            _httpClient = new HttpClient();
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
             _httpClient.Timeout = TimeSpan.FromSeconds(_config.TimeoutSeconds);
             _authHandler = AuthHandlerFactory.Create(_config.Auth);
         }
@@ -127,6 +132,14 @@ namespace ConfigLink.Api
 
         public async Task<ApiResult> SendAsync(object data, string path, string method = "POST", CancellationToken cancellationToken = default)
         {
+            // Validate HTTP method before proceeding with network call
+            var httpMethodUpper = method.ToUpper();
+            if (httpMethodUpper != "GET" && httpMethodUpper != "POST" && httpMethodUpper != "PUT" && 
+                httpMethodUpper != "DELETE" && httpMethodUpper != "PATCH")
+            {
+                throw new NotSupportedException($"HTTP method {method} is not supported");
+            }
+
             var stopwatch = Stopwatch.StartNew();
             var maxRetries = Math.Max(0, _config.Retry);
             Exception? lastException = null;
@@ -150,9 +163,7 @@ namespace ConfigLink.Api
 
                     var uri = BuildUriWithPath(data, path);
 
-                    var httpMethodUpper = method.ToUpper();
-
-                    using HttpResponseMessage? response = httpMethodUpper switch
+                    HttpResponseMessage? response = httpMethodUpper switch
                     {
                         "GET" => await _httpClient.GetAsync(uri, cancellationToken),
                         "POST" => await _httpClient.PostAsync(uri, CreateContent(data), cancellationToken),
@@ -166,6 +177,18 @@ namespace ConfigLink.Api
                     };
 
                     var responseContent = await response.Content.ReadAsStringAsync();
+
+                    // Check if we should retry based on status code
+                    if (!response.IsSuccessStatusCode && maxRetries > 0 && IsRetryableStatusCode(response.StatusCode))
+                    {
+                        // This is a server error, we should retry
+                        lastException = new HttpRequestException($"HTTP {(int)response.StatusCode}: {response.ReasonPhrase}");
+                        if (attempt < maxRetries)
+                        {
+                            await Task.Delay(1000 * (attempt + 1), cancellationToken);
+                            continue;
+                        }
+                    }
 
                     return new ApiResult
                     {
@@ -246,6 +269,16 @@ namespace ConfigLink.Api
             var uri = baseUri + fullPath;
 
             return uri;
+        }
+
+        private static bool IsRetryableStatusCode(HttpStatusCode statusCode)
+        {
+            // Retry on server errors (5xx) and some client errors (4xx)
+            var code = (int)statusCode;
+            return code >= 500 || // Server errors
+                   code == 408 || // Request Timeout
+                   code == 429 || // Too Many Requests
+                   code == 409;   // Conflict (in some scenarios)
         }
 
         public void Dispose()

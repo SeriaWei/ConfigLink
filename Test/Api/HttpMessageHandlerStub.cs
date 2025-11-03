@@ -2,7 +2,7 @@ using System.Text;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace Test.Api
+namespace ConfigLink.Api.Tests
 {
     internal class HttpMessageHandlerStub : HttpMessageHandler
     {

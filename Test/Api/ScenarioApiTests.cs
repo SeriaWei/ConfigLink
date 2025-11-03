@@ -4,7 +4,7 @@ using Xunit;
 using System.Text.Json;
 using System.Collections.Generic;
 
-namespace Test.Api
+namespace ConfigLink.Api.Tests
 {
     public class ScenarioApiTests
     {

@@ -4,7 +4,7 @@ using Moq;
 using System.Text.Json;
 using Xunit;
 
-namespace Test.Api
+namespace ConfigLink.Api.Tests
 {
     public class ApiManagerMockTests
     {
